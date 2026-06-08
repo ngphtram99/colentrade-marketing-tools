@@ -22,17 +22,15 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
 .appbar{
   min-width:0;
   display:grid;
-  grid-template-columns:minmax(220px,auto) minmax(0,1fr) auto;
+  grid-template-columns:auto minmax(0,1fr) auto;
   align-items:center;
   gap:18px;
   padding:0 18px;
   border-bottom:1px solid var(--line);
   background:rgba(7,17,29,.96);
 }
-.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand{display:flex;align-items:center;min-width:0}
 .brand img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:10px;padding:5px}
-.brand-title{font-weight:800;font-size:15px;letter-spacing:0;white-space:nowrap}
-.brand-sub{font:11px/1.3 "JetBrains Mono",monospace;color:var(--muted);margin-top:2px;white-space:nowrap}
 .menu{display:flex;gap:8px;align-items:center;min-width:0;overflow-x:auto;scrollbar-width:none}
 .menu::-webkit-scrollbar{display:none}
 .nav{
@@ -59,7 +57,6 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
   .shell{grid-template-rows:auto 1fr}
   .appbar{grid-template-columns:1fr;gap:10px;padding:12px}
   .status{display:none}
-  .brand-title{white-space:normal}
 }
 </style>
 </head>
@@ -68,10 +65,6 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
   <header class="appbar">
     <div class="brand">
       <img src="assets/company-logo.png" alt="Company logo">
-      <div>
-        <div class="brand-title">Trade Marketing Tools</div>
-        <div class="brand-sub">YMY Ceramic</div>
-      </div>
     </div>
 
     <nav class="menu" aria-label="Công cụ">
