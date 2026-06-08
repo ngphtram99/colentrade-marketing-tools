@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Định Mức Cấp Mẫu — DSM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #06101a;
+  --s1:       #0a1929;
+  --s2:       #0d2035;
+  --s3:       #102540;
+  --surface:  rgba(10,25,41,0.88);
+  --surface2: rgba(13,32,53,0.72);
+  --navy:     #054668;
+  --navy2:    #0a5a82;
+  --blue:     #2DA4DD;
+  --blue-a:   rgba(45,164,221,0.10);
+  --blue-b:   rgba(45,164,221,0.22);
+  --blue-c:   rgba(45,164,221,0.06);
+  --red:      #FF0000;
+  --red-a:    rgba(255,0,0,0.10);
+  --red-b:    rgba(255,0,0,0.22);
+  --green:    #22c55e;
+  --green-a:  rgba(34,197,94,0.10);
+  --green-b:  rgba(34,197,94,0.22);
+  --amber:    #f59e0b;
+  --amber-a:  rgba(245,158,11,0.10);
+  --amber-b:  rgba(245,158,11,0.22);
+  --t1: #e8f1f8; --t2: #86a8be; --t3: #48677d;
+  --bd1: rgba(45,164,221,0.13); --bd2: rgba(45,164,221,0.25);
+  --r: 8px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:14px;line-height:1.5;
+  background:var(--bg);color:var(--t1);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  /* subtle grid */
+  background-image:
+    linear-gradient(rgba(45,164,221,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(45,164,221,0.025) 1px,transparent 1px);
+  background-size:32px 32px;
+}
+
+/* ambient glow top */
+body::before{
+  content:'';position:fixed;top:-120px;left:50%;transform:translateX(-50%);
+  width:600px;height:300px;
+  background:radial-gradient(ellipse,rgba(5,70,104,0.35) 0%,transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+.app{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:24px 18px 72px}
+
+/* TOPBAR */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--bd1)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.bmark{
+  width:38px;height:38px;
+  background:#ffffff;
+  border:1px solid rgba(255,255,255,0.9);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+  box-shadow:0 12px 28px rgba(0,0,0,0.26),0 0 18px rgba(45,164,221,0.18);
+}
+.bmark svg{width:14px;height:14px}
+.bmark img{width:100%;height:100%;object-fit:contain;padding:5px}
+.bmark .logo-fallback{font-size:10px;font-weight:700;color:var(--blue);font-family:'JetBrains Mono',monospace}
+.bname{font-size:17px;font-weight:650;color:var(--t1);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bsub{font-size:12px;color:var(--t3);margin-top:2px;font-family:'JetBrains Mono',monospace;letter-spacing:0}
+.pill{
+  display:flex;align-items:center;gap:5px;
+  padding:6px 11px;
+  background:rgba(10,25,41,0.78);border:1px solid var(--bd1);border-radius:99px;
+  font-size:11px;color:var(--t2);
+  font-family:'JetBrains Mono',monospace;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.04);
+}
+.ldot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 6px rgba(34,197,94,0.8);animation:blink 2s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* SEGMENT */
+.seg{display:grid;grid-template-columns:1fr 1fr;background:var(--surface);border:1px solid var(--bd1);border-radius:10px;padding:4px;gap:4px;margin-bottom:14px;box-shadow:0 10px 28px rgba(0,0,0,0.18)}
+.sbt{min-height:38px;padding:8px 10px;border:none;border-radius:7px;background:transparent;color:var(--t3);font-size:13px;font-family:'Inter',sans-serif;font-weight:600;cursor:pointer;transition:all 0.18s ease;display:flex;align-items:center;justify-content:center;gap:7px;letter-spacing:0}
+.sbt svg{width:12px;height:12px;flex-shrink:0;opacity:0.6}
+.sbt.on{background:linear-gradient(135deg,rgba(5,70,104,0.98) 0%,rgba(10,90,130,0.98) 100%);color:#d6f2ff;border:1px solid var(--blue-b);box-shadow:0 8px 22px rgba(45,164,221,0.13)}
+.sbt.on svg{opacity:1}
+
+/* SEARCH */
+.sw{position:relative;margin-bottom:10px}
+.sw input{
+  width:100%;background:var(--surface);border:1px solid var(--bd1);border-radius:10px;
+  min-height:42px;padding:10px 36px 10px 36px;font-size:14px;font-family:'Inter',sans-serif;
+  color:var(--t1);outline:none;transition:border-color .15s,box-shadow .15s;
+}
+.sw input::placeholder{color:var(--t3)}
+.sw input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(45,164,221,0.11),0 12px 34px rgba(0,0,0,0.22)}
+.sw input:disabled{opacity:.4}
+.sico{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);pointer-events:none}
+.sico svg{width:13px;height:13px;display:block}
+.xb{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--s3);border:none;border-radius:3px;width:17px;height:17px;cursor:pointer;color:var(--t2);font-size:9px;display:none;align-items:center;justify-content:center}
+
+/* CHIPS */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chip{min-height:26px;padding:4px 10px;border-radius:999px;border:1px solid var(--bd1);background:rgba(10,25,41,0.42);color:var(--t3);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .14s ease;white-space:nowrap}
+.chip:hover{border-color:var(--bd2);color:var(--t2)}
+.chip.on{background:rgba(5,70,104,0.9);border-color:var(--blue-b);color:#d6f2ff;box-shadow:0 8px 18px rgba(45,164,221,0.1)}
+
+/* SUGGESTIONS */
+.sugw{background:var(--surface);border:1px solid var(--bd2);border-radius:10px;overflow:hidden;margin-bottom:10px;box-shadow:0 18px 44px rgba(0,0,0,0.42),0 0 0 1px rgba(45,164,221,0.05)}
+.sugr{padding:11px 13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--bd1);transition:background .12s ease}
+.sugr:last-child{border-bottom:none}
+.sugr:hover{background:var(--s2)}
+.sug-name{font-size:13px;font-weight:600;color:var(--t1)}
+.sug-name mark{background:none;color:var(--blue);font-weight:600}
+.sug-meta{font-size:11px;color:var(--t3);margin-top:1px}
+.sug-r{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+.tag{font-size:10px;color:var(--t3);background:var(--s3);border:1px solid var(--bd1);padding:1px 6px;border-radius:3px;font-family:'JetBrains Mono',monospace}
+.nores{padding:18px;text-align:center;font-size:12px;color:var(--t3)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:500;letter-spacing:0.02em;white-space:nowrap}
+.b-green{background:var(--green-a);color:var(--green);border:1px solid var(--green-b)}
+.b-blue{background:var(--blue-a);color:var(--blue);border:1px solid var(--blue-b)}
+.b-red{background:var(--red-a);color:var(--red);border:1px solid var(--red-b)}
+.b-amber{background:var(--amber-a);color:var(--amber);border:1px solid var(--amber-b)}
+.b-muted{background:var(--s3);color:var(--t2);border:1px solid var(--bd1)}
+
+/* RESULT CARD */
+.rcard{
+  background:linear-gradient(180deg,rgba(10,25,41,0.96),rgba(7,18,30,0.96));border:1px solid var(--bd2);border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 20px 54px rgba(0,0,0,0.36),0 0 0 1px rgba(45,164,221,0.04);
+}
+/* top accent line with scan animation */
+.rcard-stripe{
+  height:2px;
+  background:linear-gradient(90deg,transparent 0%,var(--navy) 20%,var(--blue) 60%,var(--blue) 80%,transparent 100%);
+  position:relative;overflow:hidden;
+}
+.rcard-stripe::after{
+  content:'';position:absolute;top:0;left:-20%;width:20%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.6),transparent);
+  animation:scan 3s ease-in-out infinite;
+}
+@keyframes scan{0%{left:-20%}100%{left:120%}}
+
+.rcard-head{padding:16px 17px 14px;border-bottom:1px solid var(--bd1);display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rcard-name{font-size:16px;font-weight:650;color:var(--t1);letter-spacing:0;margin-bottom:5px}
+.rcard-meta{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--t3);flex-wrap:wrap}
+.meta-sep{color:var(--bd2)}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bd1)}
+.met{padding:14px 10px;border-right:1px solid var(--bd1);text-align:center}
+.met:last-child{border-right:none}
+.met-l{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px}
+.met-v{font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:-0.02em}
+.mv-blue{color:var(--blue)}.mv-green{color:var(--green)}.mv-red{color:var(--red)}.mv-muted{color:var(--t2)}
+
+/* PROGRESS — ArcCast style */
+.prog-sec{padding:14px 16px}
+.prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prog-label{font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace;letter-spacing:0.02em}
+.prog-pct{font-size:14px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:-0.01em}
+.prog-track{
+  height:6px;background:var(--s3);border-radius:3px;
+  overflow:hidden;position:relative;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,0.4);
+}
+.prog-bar{
+  height:100%;border-radius:3px;position:relative;overflow:hidden;
+  transition:width 0.8s cubic-bezier(0.4,0,0.2,1);
+}
+/* shimmer sweep */
+.prog-bar::after{
+  content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.4),transparent);
+  animation:shim 2.4s ease-in-out infinite;
+}
+@keyframes shim{0%{left:-60%}100%{left:130%}}
+/* glow line below */
+.prog-glow{
+  height:4px;margin-top:4px;border-radius:2px;
+  opacity:0;filter:blur(4px);
+  transition:width 0.8s cubic-bezier(0.4,0,0.2,1),opacity 0.4s ease;
+}
+.prog-glow.active{opacity:0.5}
+
+/* STATS */
+.stats-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.stat{background:var(--surface);border:1px solid var(--bd1);border-radius:9px;padding:8px 12px;font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace;box-shadow:0 8px 20px rgba(0,0,0,0.14)}
+.stat strong{color:var(--t1);font-weight:600}
+
+/* EMPTY — compact, no giant icon */
+.empty{text-align:center;padding:40px 20px;color:var(--t3)}
+.empty-ico{
+  width:32px;height:32px;margin:0 auto 12px;
+  opacity:0.15;
+}
+.empty p{font-size:12px;letter-spacing:0.02em}
+
+/* REGION */
+.rg{margin-bottom:18px}
+.rg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;padding:0 2px}
+.rg-name{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.08em;display:flex;align-items:center;gap:6px}
+.rg-name::before{content:'';display:block;width:2px;height:10px;background:var(--blue);border-radius:1px;opacity:.6}
+.rg-sum{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+.rg-table{background:var(--surface);border:1px solid var(--bd1);border-radius:10px;overflow:hidden;box-shadow:0 12px 30px rgba(0,0,0,0.18)}
+.rg-row{display:flex;align-items:center;padding:9px 12px;gap:10px;border-bottom:1px solid var(--bd1);cursor:pointer;transition:background .1s}
+.rg-row:last-child{border-bottom:none}
+.rg-row:hover{background:var(--s2)}
+.rg-row.sum-row{background:var(--s2);cursor:default}
+.row-info{flex:1;min-width:0}
+.row-name{font-size:12px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px;display:flex;align-items:center;gap:5px}
+.row-name.dim{color:var(--t2);font-size:11px}
+.row-nums{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+.row-right{flex-shrink:0;text-align:right;width:64px}
+.mini-track{height:2px;background:var(--s3);border-radius:1px;margin-bottom:3px;overflow:hidden}
+.mini-bar{height:100%;border-radius:1px}
+.mini-pct{font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--t3)}
+
+/* LOADER */
+.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:54px 20px;gap:12px;color:var(--t3);font-size:12px;font-family:'JetBrains Mono',monospace}
+.ldots{display:flex;gap:4px}
+.ld{width:4px;height:4px;background:var(--blue);border-radius:50%;animation:ldot 1.2s ease-in-out infinite;opacity:.2}
+.ld:nth-child(2){animation-delay:.2s}.ld:nth-child(3){animation-delay:.4s}
+@keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* FOOTER */
+.footer{text-align:center;margin-top:34px;padding-top:18px;border-top:1px solid var(--bd1);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+.footer-copy{display:block;margin-top:7px;letter-spacing:0;text-transform:none;color:var(--t2)}
+
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@media(max-width:420px){
+  .app{padding:18px 14px 64px}
+  .topbar{align-items:flex-start;gap:12px}
+  .bmark{width:34px;height:34px}
+  .bname{font-size:15px}
+  .pill{padding:5px 9px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="bmark">
+        <img src="company-logo.png" alt="Company logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback" style="display:none">DSM</span>
+      </div>
+      <div>
+        <div class="bname">Định Mức Cấp Mẫu</div>
+        <div class="bsub" id="sub-text">connecting...</div>
+      </div>
+    </div>
+    <div class="pill"><div class="ldot"></div><span id="status-text">live</span></div>
+  </header>
+
+  <div class="seg" role="tablist">
+    <button class="sbt on" onclick="setTab('kh')" role="tab">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6" cy="6" r="4"/><path d="m10 10 3 3"/></svg>
+      Khách Hàng
+    </button>
+    <button class="sbt" onclick="setTab('mien')" role="tab">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4-2 4 2 4-2v10l-4 2-4-2-4 2V4z"/></svg>
+      Khu Vực
+    </button>
+  </div>
+
+  <div id="tab-kh">
+    <div class="sw">
+      <span class="sico">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4"/><path d="m10 10 3 3"/></svg>
+      </span>
+      <input id="inp" type="text" placeholder="Đang tải..." disabled autocomplete="off" spellcheck="false" oninput="onSearch()">
+      <button class="xb" id="xbtn" onclick="clearSearch()">✕</button>
+    </div>
+    <div class="chips" id="chips-region"></div>
+    <div id="sug-list"></div>
+    <div id="result-area">
+      <div class="loader">
+        <div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+        <span>connecting to sheets...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-mien" style="display:none">
+    <div id="region-area">
+      <div class="loader">
+        <div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+        <span>loading regions...</span>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    DSM &nbsp;·&nbsp; nội bộ &nbsp;·&nbsp; live · google sheets
+    <span class="footer-copy">© 2026 Trade Marketing Tools v1.0</span>
+  </footer>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbzByBKq9qOmA8HmWj_fODpsUkTG5CHrxcMF0DsI27zg0EL9sQHtmI87-maho6oFkctV/exec';
+let KH = [], selRegion = '', currentTab = 'kh';
+
+function fmt(n) {
+  const v = parseFloat(String(n).replace(/[^\d.-]/g, '')) || 0;
+  const a = Math.abs(v);
+  if (a >= 1e9) return (v/1e9).toFixed(2) + 'B';
+  if (a >= 1e6) return (v/1e6).toFixed(2) + 'M';
+  if (a >= 1e3) return (v/1e3).toFixed(1) + 'K';
+  return Math.round(v).toLocaleString('vi-VN');
+}
+function hl(text, q) {
+  if (!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return text;
+  return text.slice(0,i) + '<mark>' + text.slice(i, i+q.length) + '</mark>' + text.slice(i+q.length);
+}
+function barColor(pct) {
+  if (pct >= 100) return 'var(--red)';
+  if (pct >= 80)  return 'var(--green)';
+  if (pct >= 40)  return 'var(--blue)';
+  return 'var(--t3)';
+}
+function getBadge(d) {
+  if (d.tt.includes('Vượt'))    return { cls: 'b-red',   label: 'Vượt ĐM' };
+  if (d.xuat <= 0)              return { cls: 'b-muted', label: 'Chưa xuất' };
+  if (d.xuat < d.dinh * 0.99)  return { cls: 'b-amber', label: 'Đã xuất một phần' };
+  return                               { cls: 'b-green', label: 'Đã xuất' };
+}
+
+function normalizeKey(value) {
+  return String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd').replace(/Đ/g, 'D')
+    .replace(/\s+/g, ' ')
+    .replace(/[^\w/ ]+/g, '')
+    .trim()
+    .toUpperCase();
+}
+
+function toNumber(value) {
+  return parseFloat(String(value || '').replace(/[^\d.-]/g, '')) || 0;
+}
+
+function findHeaderRow(rows) {
+  const aliases = ['STT', 'KHU VUC', 'KHACH HANG', 'TINH/TP', 'NPP/DEALER', 'TONG TIEN CAP MAU', 'THUC XUAT', 'CON LAI', 'TRANG THAI'];
+  for (let i = 0; i < Math.min(rows.length, 12); i++) {
+    const line = (rows[i] || []).map(normalizeKey);
+    const hits = aliases.filter(a => line.includes(normalizeKey(a))).length;
+    if (hits >= 3) return i;
+  }
+  return 2;
+}
+
+function getCol(headerMap, aliases, fallback) {
+  for (const alias of aliases) {
+    const key = normalizeKey(alias);
+    if (headerMap[key] !== undefined) return headerMap[key];
+  }
+  return fallback;
+}
+
+function getObjectValue(row, aliases) {
+  const keys = Object.keys(row || {});
+  for (const alias of aliases) {
+    const wanted = normalizeKey(alias);
+    const found = keys.find(key => normalizeKey(key) === wanted);
+    if (found) return row[found];
+  }
+  return '';
+}
+
+function mapCapMauObjectRows(rows) {
+  return rows.map(r => {
+    const name = String(getObjectValue(r, ['KHACH HANG', 'KHÁCH HÀNG', 'Khach hang']) || '').trim();
+    if (!name || name.toLowerCase().startsWith('tổng') || name.toLowerCase() === 'total') return null;
+    return {
+      region: String(getObjectValue(r, ['KHU VUC', 'Khu vực']) || '').trim(),
+      kh: name,
+      tinh: String(getObjectValue(r, ['TINH/TP', 'Tỉnh/TP', 'Tinh TP']) || '').trim(),
+      npp: String(getObjectValue(r, ['NPP/DEALER', 'NPP Dealer']) || '').trim(),
+      dinh: toNumber(getObjectValue(r, ['TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc'])),
+      xuat: toNumber(getObjectValue(r, ['THUC XUAT', 'THỰC XUẤT', 'Da xuat'])),
+      con: toNumber(getObjectValue(r, ['CON LAI', 'CÒN LẠI'])),
+      tt: String(getObjectValue(r, ['TRANG THAI', 'TRẠNG THÁI']) || '').trim()
+    };
+  }).filter(Boolean);
+}
+
+function mapCapMauArrayRows(rows) {
+  const headerRow = findHeaderRow(rows);
+  const headers = rows[headerRow] || [];
+  const headerMap = {};
+  headers.forEach((header, index) => {
+    const key = normalizeKey(header);
+    if (key && headerMap[key] === undefined) headerMap[key] = index;
+  });
+
+  const CM = getCol(headerMap, ['KHU VUC', 'Khu vực'], 1);
+  const CK = getCol(headerMap, ['KHACH HANG', 'KHÁCH HÀNG'], 2);
+  const CT = getCol(headerMap, ['TINH/TP', 'Tỉnh/TP', 'Tinh TP'], 3);
+  const CN = getCol(headerMap, ['NPP/DEALER', 'NPP Dealer'], 4);
+  const CD = getCol(headerMap, ['TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc'], 5);
+  const CX = getCol(headerMap, ['THUC XUAT', 'THỰC XUẤT', 'Da xuat'], 7);
+  const CC = getCol(headerMap, ['CON LAI', 'CÒN LẠI'], 8);
+  const CTT = getCol(headerMap, ['TRANG THAI', 'TRẠNG THÁI'], 9);
+
+  return rows.slice(headerRow + 1).map(r => {
+    const name = String(r[CK] || '').trim();
+    if (!name || name.toLowerCase().startsWith('tổng') || name.toLowerCase() === 'total') return null;
+    return {
+      region: String(r[CM] || '').trim(),
+      kh: name,
+      tinh: String(r[CT] || '').trim(),
+      npp: String(r[CN] || '').trim(),
+      dinh: toNumber(r[CD]),
+      xuat: toNumber(r[CX]),
+      con: toNumber(r[CC]),
+      tt: String(r[CTT] || '').trim()
+    };
+  }).filter(Boolean);
+}
+
+function setTab(t) {
+  currentTab = t;
+  document.querySelectorAll('.sbt').forEach((b, i) => {
+    b.classList.toggle('on', ['kh','mien'][i] === t);
+  });
+  document.getElementById('tab-kh').style.display   = t === 'kh'   ? '' : 'none';
+  document.getElementById('tab-mien').style.display = t === 'mien' ? '' : 'none';
+  if (t === 'mien') renderRegions();
+}
+
+function loadData() {
+  window._dsm_cb = function(raw) {
+    try { parseData(raw); }
+    catch(e) { showError(); }
+  };
+  const s = document.createElement('script');
+  s.onerror = showError;
+  s.src = API + '?callback=_dsm_cb';
+  document.head.appendChild(s);
+}
+function showError() {
+  document.getElementById('status-text').textContent = 'offline';
+  document.querySelector('.ldot').style.background = 'var(--red)';
+  document.querySelector('.ldot').style.boxShadow = '0 0 6px rgba(255,0,0,0.8)';
+  document.getElementById('sub-text').textContent = 'connection failed';
+  document.getElementById('inp').placeholder = 'error';
+}
+
+function parseData(raw) {
+  const objectRows = raw.capMauRows || [];
+  const arrayRows = raw.capMau || [];
+  KH = objectRows.length ? mapCapMauObjectRows(objectRows) : mapCapMauArrayRows(arrayRows);
+  const now = new Date();
+  document.getElementById('sub-text').textContent = `T${now.getMonth()+1}/${now.getFullYear()} · ${KH.length} KH`;
+  document.getElementById('status-text').textContent = 'live';
+  const inp = document.getElementById('inp');
+  inp.disabled = false; inp.placeholder = 'Tìm theo tên khách hàng...';
+  const regions = [...new Set(KH.map(d => d.region))].filter(Boolean);
+  document.getElementById('chips-region').innerHTML =
+    `<button class="chip on" onclick="setRegion('')">Tất cả</button>` +
+    regions.map(r => `<button class="chip" onclick="setRegion('${r.replace(/'/g,"\\'")}'">${r}</button>`).join('');
+  showEmpty();
+}
+
+function showEmpty() {
+  const da = KH.filter(d => d.xuat > 0).length;
+  const ch = KH.filter(d => d.xuat === 0).length;
+  document.getElementById('result-area').innerHTML = `
+    <div class="stats-row">
+      <div class="stat">Total <strong>${KH.length}</strong></div>
+      <div class="stat">Đã xuất <strong style="color:var(--green)">${da}</strong></div>
+      <div class="stat">Chưa <strong style="color:var(--amber)">${ch}</strong></div>
+    </div>
+    <div class="empty">
+      <svg class="empty-ico" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2">
+        <circle cx="14" cy="14" r="9"/><path d="m21 21 6 6"/>
+      </svg>
+      <p>gõ tên khách hàng để tra cứu</p>
+    </div>`;
+}
+
+function setRegion(r) {
+  selRegion = r;
+  document.querySelectorAll('#chips-region .chip').forEach(c =>
+    c.classList.toggle('on', c.textContent === (r || 'Tất cả'))
+  );
+  onSearch();
+}
+
+function onSearch() {
+  const q = document.getElementById('inp').value.trim();
+  document.getElementById('xbtn').style.display = q ? 'flex' : 'none';
+  const sl = document.getElementById('sug-list');
+  const ra = document.getElementById('result-area');
+  if (!q) { sl.innerHTML = ''; showEmpty(); return; }
+  const matches = KH.filter(d =>
+    (!selRegion || d.region === selRegion) &&
+    d.kh.toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 8);
+  if (!matches.length) {
+    sl.innerHTML = `<div class="sugw"><div class="nores">không tìm thấy "<strong>${q}</strong>"</div></div>`;
+    ra.innerHTML = ''; return;
+  }
+  sl.innerHTML = `<div class="sugw">${matches.map(d => {
+    const idx = KH.indexOf(d);
+    const b = getBadge(d);
+    return `<div class="sugr" onclick="pickKH(${idx})">
+      <div>
+        <div class="sug-name">${hl(d.kh, q)}</div>
+        <div class="sug-meta">${d.region}${d.tinh?' · '+d.tinh:''}</div>
+      </div>
+      <div class="sug-r">
+        <span class="badge ${b.cls}">${b.label}</span>
+        ${d.npp?`<span class="tag">${d.npp}</span>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+  ra.innerHTML = '';
+}
+
+function pickKH(idx) {
+  const d = KH[idx];
+  document.getElementById('inp').value = d.kh;
+  document.getElementById('xbtn').style.display = 'flex';
+  document.getElementById('sug-list').innerHTML = '';
+  const pct = d.dinh > 0 ? Math.round(d.xuat / d.dinh * 100) : 0;
+  const bc  = barColor(pct);
+  const badge = getBadge(d);
+  document.getElementById('result-area').innerHTML = `
+    <div class="rcard">
+      <div class="rcard-stripe"></div>
+      <div class="rcard-head">
+        <div>
+          <div class="rcard-name">${d.kh}</div>
+          <div class="rcard-meta">
+            ${d.region}<span class="meta-sep">·</span>${d.tinh||'—'}${d.npp?`<span class="meta-sep">·</span>${d.npp}`:''}
+          </div>
+        </div>
+        <span class="badge ${badge.cls}">${badge.label}</span>
+      </div>
+      <div class="metrics">
+        <div class="met"><div class="met-l">Định mức</div><div class="met-v mv-blue">${fmt(d.dinh)}</div></div>
+        <div class="met"><div class="met-l">Đã xuất</div><div class="met-v ${d.xuat>0?'mv-green':'mv-muted'}">${fmt(d.xuat)}</div></div>
+        <div class="met"><div class="met-l">Còn lại</div><div class="met-v ${d.con<0?'mv-red':'mv-muted'}">${fmt(d.con)}</div></div>
+      </div>
+      <div class="prog-sec">
+        <div class="prog-top">
+          <span class="prog-label">TỶ LỆ THỰC HIỆN</span>
+          <span class="prog-pct" style="color:${bc}">${pct}%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-bar" id="pbar" style="width:0%;background:${bc}"></div>
+        </div>
+        <div class="prog-glow" id="pglow" style="width:0%;background:${bc}"></div>
+      </div>
+    </div>`;
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      const bar  = document.getElementById('pbar');
+      const glow = document.getElementById('pglow');
+      if (bar)  bar.style.width  = Math.min(pct, 100) + '%';
+      if (glow) { glow.style.width = Math.min(pct, 100) + '%'; glow.classList.add('active'); }
+    }, 30);
+  });
+}
+
+function clearSearch() {
+  document.getElementById('inp').value = '';
+  document.getElementById('xbtn').style.display = 'none';
+  document.getElementById('sug-list').innerHTML = '';
+  showEmpty();
+  document.getElementById('inp').focus();
+}
+
+function renderRegions() {
+  const ra = document.getElementById('region-area');
+  if (!KH.length) return;
+  const regions = [...new Set(KH.map(d => d.region))].filter(Boolean);
+  let html = '';
+  regions.forEach(region => {
+    const list  = KH.filter(d => d.region === region);
+    const tD    = list.reduce((s,d) => s+d.dinh, 0);
+    const tX    = list.reduce((s,d) => s+d.xuat, 0);
+    const tC    = tD - tX;
+    const pct   = tD > 0 ? Math.round(tX/tD*100) : 0;
+    const bc    = barColor(pct);
+    const done  = list.filter(d => d.xuat > 0).length;
+    html += `<div class="rg">
+      <div class="rg-head">
+        <div class="rg-name">${region}</div>
+        <div class="rg-sum">${done}/${list.length} · ${fmt(tX)}/${fmt(tD)}</div>
+      </div>
+      <div class="rg-table">
+        <div class="rg-row sum-row">
+          <div class="row-info">
+            <div class="row-name dim">Tổng khu vực</div>
+            <div class="row-nums">${fmt(tD)} → ${fmt(tX)} · còn ${fmt(tC)}</div>
+          </div>
+          <div class="row-right">
+            <div class="mini-track"><div class="mini-bar" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+            <div class="mini-pct" style="color:${bc}">${pct}%</div>
+          </div>
+        </div>`;
+    list.forEach(d => {
+      const p  = d.dinh > 0 ? Math.round(d.xuat/d.dinh*100) : 0;
+      const bc2 = barColor(p);
+      const b = getBadge(d);
+      const showBadge = d.tt.includes('Vượt') || d.xuat === 0;
+      html += `<div class="rg-row" onclick="goToKH(${KH.indexOf(d)})">
+        <div class="row-info">
+          <div class="row-name">
+            ${d.kh}
+            ${showBadge ? `<span class="badge ${b.cls}" style="font-size:9px;padding:1px 5px">${b.label}</span>` : ''}
+          </div>
+          <div class="row-nums">${fmt(d.dinh)} → ${fmt(d.xuat)}</div>
+        </div>
+        <div class="row-right">
+          <div class="mini-track"><div class="mini-bar" style="width:${Math.min(p,100)}%;background:${bc2}"></div></div>
+          <div class="mini-pct" style="color:${bc2}">${p}%</div>
+        </div>
+      </div>`;
+    });
+    html += `</div></div>`;
+  });
+  ra.innerHTML = html;
+}
+
+function goToKH(idx) {
+  setTab('kh');
+  requestAnimationFrame(() => pickKH(idx));
+}
+
+loadData();
+</script>
+</body>
+</html>

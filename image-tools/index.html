@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MKT Report Control</title>
+    <link rel="stylesheet" href="styles.css?v=10" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-logo">
+            <img src="company-logo.png" alt="Italian Art" />
+          </div>
+          <div>
+            <h1>MKT Report Control</h1>
+            <p>Theo dõi hình ảnh thị trường</p>
+            <small class="version-badge">Control Suite</small>
+          </div>
+        </div>
+
+        <nav class="tabs" aria-label="Dashboard tabs">
+          <button class="tab is-active" data-tab="overview">Tổng quan</button>
+          <button class="tab" data-tab="orders">Tất cả phiếu</button>
+          <button class="tab" data-tab="missing">Cần xử lý</button>
+          <button class="tab" data-tab="gallery">Duyệt hình</button>
+        </nav>
+
+        <div class="refresh-box">
+          <button id="refreshBtn" class="primary-btn">Tải lại dữ liệu</button>
+          <p id="lastUpdated">Chưa tải dữ liệu</p>
+        </div>
+      </aside>
+
+      <main class="main">
+        <header class="topbar">
+          <div class="page-heading">
+            <h2 id="pageTitle">Tổng quan</h2>
+            <p id="pageSubtitle">Tình trạng upload hình ảnh theo miền</p>
+          </div>
+          <div class="filters">
+            <label>
+              <span>Miền</span>
+              <select id="regionFilter">
+                <option value="">Tất cả</option>
+              </select>
+            </label>
+            <label>
+              <span>Trạng thái</span>
+              <select id="statusFilter">
+                <option value="">Tất cả</option>
+                <option value="missing">Thiếu hình</option>
+                <option value="uploaded">Đã upload</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="error">Lỗi folder</option>
+              </select>
+            </label>
+            <label>
+              <span>Tìm kiếm</span>
+              <input id="searchInput" type="search" placeholder="Mã đơn, khách hàng, nhân viên" />
+            </label>
+          </div>
+        </header>
+
+        <section id="errorBox" class="error-box" hidden></section>
+
+        <section class="panel tab-panel is-active" id="overviewPanel">
+          <div class="metric-grid">
+            <article class="metric">
+              <span>Tổng phiếu</span>
+              <strong id="totalMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Đã upload</span>
+              <strong id="reportedMetric">0</strong>
+            </article>
+            <article class="metric warn">
+              <span>Chưa upload</span>
+              <strong id="notReportedMetric">0</strong>
+            </article>
+            <article class="metric danger">
+              <span>Thiếu hình</span>
+              <strong id="missingMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Chờ duyệt</span>
+              <strong id="pendingMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Tỷ lệ upload</span>
+              <strong id="rateMetric">0%</strong>
+            </article>
+          </div>
+
+          <div class="region-grid" id="regionGrid"></div>
+
+          <div class="overview-split system-only">
+            <section class="work-panel">
+              <div class="section-title">
+                <h3>Vận hành</h3>
+                <span id="systemStatus">Đang đọc dữ liệu</span>
+              </div>
+              <div class="system-grid">
+                <div>
+                  <span>Folder lỗi</span>
+                  <strong id="folderErrorMetric">0</strong>
+                </div>
+                <div>
+                  <span>Tự tải lại</span>
+                  <strong>10 phút</strong>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="ordersPanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Sản phẩm</th>
+                  <th>Số ảnh</th>
+                  <th>Trạng thái</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="missingPanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody id="missingBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="galleryPanel">
+          <div class="gallery-layout">
+            <div class="order-list" id="galleryOrders"></div>
+            <div class="gallery-view">
+              <div class="gallery-header">
+                <div>
+                  <h3 id="galleryTitle">Chọn một đơn để xem ảnh</h3>
+                  <p id="galleryMeta"></p>
+                </div>
+                <a id="openFolderLink" class="ghost-link" href="#" target="_blank" rel="noreferrer" hidden>Mở Drive</a>
+              </div>
+              <div class="image-grid" id="imageGrid"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+    </div>
+
+    <dialog id="previewDialog">
+      <button class="close-btn" id="closePreview" aria-label="Đóng">×</button>
+      <img id="previewImage" alt="" />
+    </dialog>
+
+    <script src="app.js?v=10"></script>
+  </body>
+</html>
