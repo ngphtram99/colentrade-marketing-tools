@@ -5,12 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Trade Marketing Tools</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:#07111d;
-  --panel:#0b1a2a;
-  --panel2:#10243a;
   --text:#e8f1f8;
   --muted:#89a8ba;
   --line:rgba(45,164,221,.18);
@@ -19,116 +17,87 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{
-  font-family:Inter,system-ui,sans-serif;
-  color:var(--text);
-  background:var(--bg);
-}
-.shell{min-height:100%;display:grid;grid-template-columns:248px 1fr}
-.side{
-  border-right:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(11,26,42,.96),rgba(7,17,29,.96));
-  padding:18px 14px;
-  display:flex;
-  flex-direction:column;
+body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--bg)}
+.shell{min-height:100%;display:grid;grid-template-rows:66px 1fr}
+.appbar{
+  min-width:0;
+  display:grid;
+  grid-template-columns:minmax(220px,auto) minmax(0,1fr) auto;
+  align-items:center;
   gap:18px;
+  padding:0 18px;
+  border-bottom:1px solid var(--line);
+  background:rgba(7,17,29,.96);
 }
-.brand{display:flex;align-items:center;gap:11px;padding:6px 6px 14px;border-bottom:1px solid var(--line)}
-.brand img{width:38px;height:38px;object-fit:contain;background:#fff;border-radius:9px;padding:5px}
-.brand-title{font-weight:700;font-size:15px;letter-spacing:0}
-.brand-sub{font:11px/1.4 "JetBrains Mono",monospace;color:var(--muted);margin-top:2px}
-.menu{display:flex;flex-direction:column;gap:7px}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand img{width:42px;height:42px;object-fit:contain;background:#fff;border-radius:10px;padding:5px}
+.brand-title{font-weight:800;font-size:15px;letter-spacing:0;white-space:nowrap}
+.brand-sub{font:11px/1.3 "JetBrains Mono",monospace;color:var(--muted);margin-top:2px;white-space:nowrap}
+.menu{display:flex;gap:8px;align-items:center;min-width:0;overflow-x:auto;scrollbar-width:none}
+.menu::-webkit-scrollbar{display:none}
 .nav{
-  width:100%;
   border:1px solid transparent;
   border-radius:8px;
   background:transparent;
   color:var(--muted);
-  min-height:44px;
-  padding:9px 10px;
+  min-height:40px;
+  padding:0 13px;
   display:flex;
   align-items:center;
-  gap:10px;
+  gap:9px;
   cursor:pointer;
-  font:600 13px Inter,sans-serif;
-  text-align:left;
+  font:700 13px Inter,sans-serif;
+  white-space:nowrap;
 }
-.nav svg{width:17px;height:17px;flex:0 0 auto}
+.nav svg{width:16px;height:16px;flex:0 0 auto}
 .nav:hover{background:rgba(45,164,221,.08);border-color:var(--line);color:var(--text)}
-.nav.active{
-  color:#d6f2ff;
-  border-color:rgba(45,164,221,.28);
-  background:linear-gradient(135deg,rgba(5,70,104,.96),rgba(10,90,130,.96));
-  box-shadow:0 10px 24px rgba(0,0,0,.18);
-}
-.side-foot{margin-top:auto;color:#5f7d91;font:10px/1.6 "JetBrains Mono",monospace;padding:10px 7px;border-top:1px solid var(--line)}
-.main{min-width:0;display:grid;grid-template-rows:54px 1fr;background:#06101a}
-.top{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-  border-bottom:1px solid var(--line);
-  background:rgba(7,17,29,.88);
-}
-.page-title{font-weight:700;font-size:14px}
-.status{display:flex;align-items:center;gap:7px;color:var(--muted);font:11px "JetBrains Mono",monospace}
+.nav.active{color:#d6f2ff;border-color:rgba(45,164,221,.32);background:linear-gradient(135deg,rgba(5,70,104,.96),rgba(10,90,130,.96));box-shadow:0 10px 24px rgba(0,0,0,.18)}
+.status{display:flex;align-items:center;gap:7px;color:var(--muted);font:11px "JetBrains Mono",monospace;white-space:nowrap}
 .dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px rgba(34,197,94,.8)}
-.frame{width:100%;height:100%;border:0;background:#06101a}
+.frame{width:100%;height:100%;border:0;background:#06101a;display:block}
 @media(max-width:760px){
-  .shell{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-  .side{border-right:0;border-bottom:1px solid var(--line);padding:12px}
-  .brand{padding-bottom:10px}
-  .menu{display:grid;grid-template-columns:1fr 1fr}
-  .side-foot{display:none}
-  .main{min-height:calc(100vh - 145px)}
-  .top{height:48px;padding:0 12px}
+  .shell{grid-template-rows:auto 1fr}
+  .appbar{grid-template-columns:1fr;gap:10px;padding:12px}
+  .status{display:none}
+  .brand-title{white-space:normal}
 }
 </style>
 </head>
 <body>
 <div class="shell">
-  <aside class="side">
+  <header class="appbar">
     <div class="brand">
       <img src="assets/company-logo.png" alt="Company logo">
       <div>
         <div class="brand-title">Trade Marketing Tools</div>
-        <div class="brand-sub">one vercel app</div>
+        <div class="brand-sub">YMY Ceramic</div>
       </div>
     </div>
 
     <nav class="menu" aria-label="Công cụ">
-      <button class="nav active" data-src="dsm/" data-title="Định Mức Cấp Mẫu">
+      <button class="nav active" data-src="dsm/" data-title="Định mức cấp mẫu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5"/><path d="M9 19V9"/><path d="M14 19V7"/><path d="M19 19v-4"/></svg>
-        DSM
+        Định mức cấp mẫu
       </button>
-      <button class="nav" data-src="image-tools/" data-title="Công cụ theo hình ảnh">
+      <button class="nav" data-src="image-tools/" data-title="Cập nhật hình ảnh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="m21 15-5-5L5 19"/></svg>
-        Hình ảnh
+        Cập nhật hình ảnh
       </button>
     </nav>
 
-    <div class="side-foot">DSM · image tools · shared shell</div>
-  </aside>
+    <div class="status"><span class="dot"></span><span>ready</span></div>
+  </header>
 
-  <main class="main">
-    <header class="top">
-      <div class="page-title" id="page-title">Định Mức Cấp Mẫu</div>
-      <div class="status"><span class="dot"></span><span>ready</span></div>
-    </header>
-    <iframe class="frame" id="tool-frame" src="dsm/" title="Trade Marketing Tool"></iframe>
-  </main>
+  <iframe class="frame" id="tool-frame" src="dsm/" title="Trade Marketing Tool"></iframe>
 </div>
 
 <script>
 const frame = document.getElementById('tool-frame');
-const title = document.getElementById('page-title');
 document.querySelectorAll('.nav').forEach(button => {
   button.addEventListener('click', () => {
     document.querySelectorAll('.nav').forEach(item => item.classList.remove('active'));
     button.classList.add('active');
     frame.src = button.dataset.src;
-    title.textContent = button.dataset.title;
   });
 });
 </script>

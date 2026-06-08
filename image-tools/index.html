@@ -4,36 +4,32 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MKT Report Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css?v=10" />
   </head>
   <body>
     <div class="app-shell">
-      <aside class="sidebar">
-        <div class="brand">
-          <div class="brand-logo">
-            <img src="company-logo.png" alt="Italian Art" />
-          </div>
-          <div>
-            <h1>MKT Report Control</h1>
-            <p>Theo dõi hình ảnh thị trường</p>
-            <small class="version-badge">Control Suite</small>
-          </div>
-        </div>
-
-        <nav class="tabs" aria-label="Dashboard tabs">
-          <button class="tab is-active" data-tab="overview">Tổng quan</button>
-          <button class="tab" data-tab="orders">Tất cả phiếu</button>
-          <button class="tab" data-tab="missing">Cần xử lý</button>
-          <button class="tab" data-tab="gallery">Duyệt hình</button>
-        </nav>
-
-        <div class="refresh-box">
-          <button id="refreshBtn" class="primary-btn">Tải lại dữ liệu</button>
-          <p id="lastUpdated">Chưa tải dữ liệu</p>
-        </div>
-      </aside>
-
       <main class="main">
+        <section class="toolbar">
+          <div class="brand compact-brand">
+            <div class="brand-logo">
+              <img src="company-logo.png" alt="Company logo" />
+            </div>
+            <div>
+              <h1>MKT Report Control</h1>
+              <p>Theo dõi hình ảnh thị trường</p>
+            </div>
+          </div>
+
+          <nav class="tabs" aria-label="Dashboard tabs">
+            <button class="tab is-active" data-tab="overview">Tổng quan</button>
+            <button class="tab" data-tab="orders">Tất cả phiếu</button>
+            <button class="tab" data-tab="missing">Cần xử lý</button>
+            <button class="tab" data-tab="gallery">Duyệt hình</button>
+          </nav>
+        </section>
+
         <header class="topbar">
           <div class="page-heading">
             <h2 id="pageTitle">Tổng quan</h2>
@@ -57,9 +53,19 @@
               </select>
             </label>
             <label>
+              <span>Từ ngày</span>
+              <input id="dateFromInput" type="date" />
+            </label>
+            <label>
+              <span>Đến ngày</span>
+              <input id="dateToInput" type="date" />
+            </label>
+            <label>
               <span>Tìm kiếm</span>
               <input id="searchInput" type="search" placeholder="Mã đơn, khách hàng, nhân viên" />
             </label>
+            <button id="refreshBtn" class="primary-btn">Tải lại dữ liệu</button>
+            <p id="lastUpdated" class="last-updated">Chưa tải dữ liệu</p>
           </div>
         </header>
 
@@ -170,6 +176,8 @@
           </div>
         </section>
       </main>
+
+      <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
 
     </div>
 

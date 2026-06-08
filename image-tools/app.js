@@ -4,7 +4,9 @@ const state = {
   selectedOrderId: "",
   region: "",
   status: "",
-  search: ""
+  search: "",
+  dateFrom: "",
+  dateTo: ""
 };
 
 const els = {
@@ -19,6 +21,8 @@ const els = {
   pageSubtitle: document.getElementById("pageSubtitle"),
   regionFilter: document.getElementById("regionFilter"),
   statusFilter: document.getElementById("statusFilter"),
+  dateFromInput: document.getElementById("dateFromInput"),
+  dateToInput: document.getElementById("dateToInput"),
   searchInput: document.getElementById("searchInput"),
   refreshBtn: document.getElementById("refreshBtn"),
   lastUpdated: document.getElementById("lastUpdated"),
@@ -85,6 +89,40 @@ function matchesStatus(order) {
   return true;
 }
 
+function parseOrderDate(value) {
+  const text = String(value || "").trim();
+  if (!text) return null;
+
+  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
+
+  const vn = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (vn) return new Date(Number(vn[3]), Number(vn[2]) - 1, Number(vn[1]));
+
+  const parsed = new Date(text);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+function parseInputDate(value, endOfDay = false) {
+  if (!value) return null;
+  const parts = value.split("-").map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+  return new Date(parts[0], parts[1] - 1, parts[2], endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
+}
+
+function matchesDate(order) {
+  if (!state.dateFrom && !state.dateTo) return true;
+  const orderDate = parseOrderDate(order.date);
+  if (!orderDate) return false;
+
+  const from = parseInputDate(state.dateFrom);
+  const to = parseInputDate(state.dateTo, true);
+
+  if (from && orderDate < from) return false;
+  if (to && orderDate > to) return false;
+  return true;
+}
+
 function getFilteredOrders() {
   if (!state.data) return [];
 
@@ -100,7 +138,7 @@ function getFilteredOrders() {
       order.product
     ].join(" ").toLowerCase();
 
-    return matchesRegion && matchesStatus(order) && (!search || searchText.includes(search));
+    return matchesRegion && matchesStatus(order) && matchesDate(order) && (!search || searchText.includes(search));
   });
 }
 
@@ -323,6 +361,18 @@ els.regionFilter.addEventListener("change", event => {
 
 els.statusFilter.addEventListener("change", event => {
   state.status = event.target.value;
+  state.selectedOrderId = "";
+  render();
+});
+
+els.dateFromInput.addEventListener("change", event => {
+  state.dateFrom = event.target.value;
+  state.selectedOrderId = "";
+  render();
+});
+
+els.dateToInput.addEventListener("change", event => {
+  state.dateTo = event.target.value;
   state.selectedOrderId = "";
   render();
 });
