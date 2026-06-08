@@ -52,6 +52,14 @@ function buildRanges(sheetNames) {
   return sheetNames.map(sheetName => `'${sheetName.replace(/'/g, "''")}'!A:Z`);
 }
 
+function getAppsScriptApiUrl(rawUrl) {
+  const url = new URL(rawUrl);
+  if (url.hostname === "script.google.com" && !url.searchParams.has("api")) {
+    url.searchParams.set("api", "1");
+  }
+  return url.toString();
+}
+
 module.exports = async function handler(req, res) {
   if (req.method && req.method !== "GET") {
     json(res, 405, { error: "Method not allowed." });
@@ -60,7 +68,7 @@ module.exports = async function handler(req, res) {
 
   try {
     if (process.env.APPS_SCRIPT_API_URL) {
-      const response = await fetch(process.env.APPS_SCRIPT_API_URL);
+      const response = await fetch(getAppsScriptApiUrl(process.env.APPS_SCRIPT_API_URL));
       const text = await response.text();
       const isJson = text.trim().startsWith("{") || text.trim().startsWith("[");
 
