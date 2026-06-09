@@ -19,6 +19,13 @@
       <i class="tz-chip tz-g"></i>
       <i class="tz-chip tz-h"></i>
       <i class="tz-chip tz-i"></i>
+      <i class="tz-chip tz-j"></i>
+      <i class="tz-chip tz-k"></i>
+      <i class="tz-chip tz-l"></i>
+      <i class="tz-chip tz-m"></i>
+      <i class="tz-chip tz-n"></i>
+      <i class="tz-chip tz-o"></i>
+      <i class="tz-chip tz-p"></i>
     </div>
     <div class="terrazzo-speckles" aria-hidden="true"></div>
     <div class="terrazzo-vignette" aria-hidden="true"></div>
@@ -224,10 +231,10 @@
               const dx = cx - event.clientX;
               const dy = cy - event.clientY;
               const distance = Math.hypot(dx, dy);
-              const reach = 170;
+              const reach = 190;
 
               if (distance < reach) {
-                const power = (1 - distance / reach) * 32;
+                const power = (1 - distance / reach) * 52;
                 const angle = Math.atan2(dy, dx);
                 chip.style.setProperty("--rx", `${Math.cos(angle) * power}px`);
                 chip.style.setProperty("--ry", `${Math.sin(angle) * power}px`);

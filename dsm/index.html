@@ -53,27 +53,37 @@ body{
 body::before{
   content:'';position:fixed;inset:0;
   background:
-    linear-gradient(rgba(45,164,221,0.035) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(45,164,221,0.035) 1px,transparent 1px);
-  background-size:36px 36px;
+    radial-gradient(circle,rgba(45,164,221,.12) 0 1px,transparent 1.8px),
+    radial-gradient(circle,rgba(255,255,255,.08) 0 1px,transparent 1.6px);
+  background-position:0 0,44px 38px;
+  background-size:88px 88px,118px 118px;
+  opacity:.55;
   pointer-events:none;z-index:0;
   mask-image:linear-gradient(180deg,rgba(0,0,0,.86),rgba(0,0,0,.38));
 }
 
 .terrazzo-bg,.terrazzo-speckles,.terrazzo-vignette{position:fixed;inset:-80px;pointer-events:none}
-.terrazzo-bg{z-index:0;opacity:.7;transform:translate3d(calc(var(--px,0px)*.16),calc(var(--py,0px)*.16),0);transition:transform .16s ease-out}
-.terrazzo-speckles{z-index:0;opacity:.62;background-image:radial-gradient(circle,rgba(255,255,255,.18) 0 1.4px,transparent 1.8px),radial-gradient(circle,rgba(45,164,221,.18) 0 1px,transparent 1.5px),radial-gradient(circle,rgba(255,174,51,.14) 0 1px,transparent 1.6px);background-position:0 0,42px 26px,88px 58px;background-size:128px 128px,156px 156px,188px 188px;transform:translate3d(calc(var(--px,0px)*-.08),calc(var(--py,0px)*-.08),0);transition:transform .16s ease-out}
+.terrazzo-bg{z-index:0;opacity:.74;transform:translate3d(calc(var(--px,0px)*.18),calc(var(--py,0px)*.18),0);transition:transform .16s ease-out}
+.terrazzo-speckles{z-index:0;opacity:.58;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.52) 0 1px,transparent 2px),radial-gradient(circle at 70% 60%,rgba(226,138,94,.48) 0 1px,transparent 2px),radial-gradient(circle at 45% 80%,rgba(109,153,150,.52) 0 1px,transparent 2px),radial-gradient(circle at 85% 24%,rgba(240,196,103,.48) 0 1px,transparent 2px),radial-gradient(circle at 30% 72%,rgba(159,192,207,.45) 0 1px,transparent 2px),radial-gradient(circle at 58% 18%,rgba(217,184,181,.4) 0 1px,transparent 2px);background-size:54px 64px,68px 58px,82px 74px,96px 86px,112px 104px,132px 118px;transform:translate3d(calc(var(--px,0px)*-.12),calc(var(--py,0px)*-.12),0);transition:transform .16s ease-out}
 .terrazzo-vignette{z-index:0;inset:0;background:radial-gradient(circle at center,transparent 12%,rgba(1,8,14,.45) 100%)}
-.tz-chip{--rx:0px;--ry:0px;--shine:0;--mx:.05;--my:.05;--tr:0deg;position:absolute;display:block;border-radius:48% 52% 56% 44%;background:rgba(255,255,255,.14);box-shadow:0 24px 48px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,calc(.12 + var(--shine)));filter:brightness(calc(1 + var(--shine)));transform:translate3d(calc(var(--px,0px)*var(--mx) + var(--rx)),calc(var(--py,0px)*var(--my) + var(--ry)),0) rotate(var(--tr));transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .18s ease,box-shadow .18s ease;animation:floatChip 13s ease-in-out infinite alternate}
-.tz-a{width:86px;height:34px;left:4%;top:12%;--tr:-18deg;--mx:.09;--my:.05;background:rgba(108,126,128,.18)}
-.tz-b{width:64px;height:28px;left:15%;top:76%;--tr:-31deg;--mx:-.05;--my:.08;background:rgba(128,70,58,.2);animation-duration:15s}
-.tz-c{width:58px;height:58px;left:31%;top:20%;--tr:18deg;--mx:.04;--my:-.06;background:rgba(203,161,89,.16);border-radius:42% 58% 46% 54%;animation-duration:11s}
-.tz-d{width:92px;height:42px;left:64%;top:17%;--tr:23deg;--mx:-.08;--my:.04;background:rgba(135,151,157,.16)}
-.tz-e{width:76px;height:30px;left:83%;top:39%;--tr:6deg;--mx:.07;--my:.07;background:rgba(105,59,50,.19);animation-duration:12s}
-.tz-f{width:92px;height:44px;left:80%;top:84%;--tr:12deg;--mx:-.06;--my:-.05;background:rgba(125,132,126,.18);animation-duration:16s}
-.tz-g{width:48px;height:22px;left:19%;top:45%;--tr:-10deg;--mx:.08;--my:-.08;background:rgba(78,119,122,.2)}
-.tz-h{width:72px;height:30px;left:48%;top:9%;--tr:-34deg;--mx:-.04;--my:.06;background:rgba(177,158,122,.16)}
-.tz-i{width:44px;height:26px;left:68%;top:51%;--tr:14deg;--mx:.05;--my:-.04;background:rgba(151,164,166,.18);animation-duration:10s}
+.tz-chip{--rx:0px;--ry:0px;--shine:0;--mx:.2;--my:.2;--tr:0deg;--o:.36;position:absolute;display:block;border-radius:58% 42% 62% 38% / 48% 56% 44% 52%;background:var(--c);width:var(--w);height:var(--h);opacity:calc(var(--o) + var(--shine));box-shadow:0 24px 48px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,calc(.12 + var(--shine)));filter:brightness(calc(1 + var(--shine)));transform:translate3d(calc(var(--px,0px)*var(--mx) + var(--rx)),calc(var(--py,0px)*var(--my) + var(--ry)),0) rotate(var(--tr));transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .18s ease,box-shadow .18s ease;animation:floatChip var(--d,9s) ease-in-out infinite alternate}
+.tz-chip::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(135deg,rgba(255,255,255,.28),transparent 55%);mix-blend-mode:screen}
+.tz-a{--c:#4f7772;--w:70px;--h:54px;--o:.46;--tr:-24deg;--mx:.45;--my:.28;--d:8s;left:6%;top:12%}
+.tz-b{--c:#e28a5e;--w:44px;--h:32px;--o:.42;--tr:18deg;--mx:-.3;--my:.4;--d:7s;left:18%;top:21%}
+.tz-c{--c:#ead09b;--w:58px;--h:34px;--o:.38;--tr:-38deg;--mx:.25;--my:-.35;--d:9s;left:39%;top:10%}
+.tz-d{--c:#bfd1dc;--w:64px;--h:40px;--o:.36;--tr:32deg;--mx:-.46;--my:.18;--d:10s;right:18%;top:16%}
+.tz-e{--c:#9b4e37;--w:48px;--h:32px;--o:.4;--tr:12deg;--mx:.34;--my:-.28;--d:8.5s;right:7%;top:30%}
+.tz-f{--c:#d9b8b5;--w:42px;--h:52px;--o:.34;--tr:-14deg;--mx:-.2;--my:.34;--d:9.2s;left:14%;top:43%}
+.tz-g{--c:#343537;--w:64px;--h:50px;--o:.34;--tr:-26deg;--mx:.38;--my:.22;--d:7.8s;left:34%;top:48%}
+.tz-h{--c:#e8b28f;--w:54px;--h:38px;--o:.45;--tr:20deg;--mx:-.44;--my:-.2;--d:8.8s;right:28%;top:47%}
+.tz-i{--c:#6d9996;--w:78px;--h:46px;--o:.36;--tr:-10deg;--mx:.26;--my:-.42;--d:10s;right:8%;top:58%}
+.tz-j{--c:#f0c467;--w:44px;--h:70px;--o:.42;--tr:23deg;--mx:-.28;--my:.34;--d:9.5s;left:22%;bottom:23%}
+.tz-k{--c:#7b7a7d;--w:34px;--h:25px;--o:.35;--tr:-18deg;--mx:.42;--my:.24;--d:6.8s;left:52%;bottom:26%}
+.tz-l{--c:#e46f49;--w:50px;--h:32px;--o:.42;--tr:-34deg;--mx:-.36;--my:.22;--d:8s;left:7%;bottom:13%}
+.tz-m{--c:#e6d8bd;--w:60px;--h:38px;--o:.36;--tr:18deg;--mx:.32;--my:-.3;--d:9s;right:21%;bottom:15%}
+.tz-n{--c:#9fc0cf;--w:62px;--h:44px;--o:.34;--tr:-8deg;--mx:-.42;--my:.24;--d:10s;right:5%;bottom:8%}
+.tz-o{--c:#fff;--w:34px;--h:20px;--o:.18;--tr:22deg;--mx:.2;--my:.28;--d:7.2s;left:64%;top:28%}
+.tz-p{--c:#fff;--w:24px;--h:18px;--o:.16;--tr:-16deg;--mx:-.2;--my:.18;--d:8.4s;left:29%;top:67%}
 @keyframes floatChip{from{margin-top:-4px}to{margin-top:8px}}
 
 .app{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:24px 18px 72px}
@@ -280,6 +290,13 @@ body::before{
   <i class="tz-chip tz-g"></i>
   <i class="tz-chip tz-h"></i>
   <i class="tz-chip tz-i"></i>
+  <i class="tz-chip tz-j"></i>
+  <i class="tz-chip tz-k"></i>
+  <i class="tz-chip tz-l"></i>
+  <i class="tz-chip tz-m"></i>
+  <i class="tz-chip tz-n"></i>
+  <i class="tz-chip tz-o"></i>
+  <i class="tz-chip tz-p"></i>
 </div>
 <div class="terrazzo-speckles" aria-hidden="true"></div>
 <div class="terrazzo-vignette" aria-hidden="true"></div>
@@ -367,9 +384,9 @@ body::before{
         const dx = cx - event.clientX;
         const dy = cy - event.clientY;
         const distance = Math.hypot(dx, dy);
-        const reach = 170;
-        if (distance < reach) {
-          const power = (1 - distance / reach) * 32;
+      const reach = 190;
+      if (distance < reach) {
+        const power = (1 - distance / reach) * 52;
           const angle = Math.atan2(dy, dx);
           chip.style.setProperty('--rx', `${Math.cos(angle) * power}px`);
           chip.style.setProperty('--ry', `${Math.sin(angle) * power}px`);

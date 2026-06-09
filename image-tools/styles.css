@@ -920,10 +920,12 @@ body::before {
   z-index: 0;
   pointer-events: none;
   background:
-    linear-gradient(rgba(45, 164, 221, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45, 164, 221, 0.035) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.38));
+    radial-gradient(circle, rgba(45, 164, 221, 0.12) 0 1px, transparent 1.8px),
+    radial-gradient(circle, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.6px);
+  background-position: 0 0, 44px 38px;
+  background-size: 88px 88px, 118px 118px;
+  opacity: 0.55;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.42));
 }
 
 .terrazzo-bg,
@@ -936,21 +938,23 @@ body::before {
 
 .terrazzo-bg {
   z-index: 0;
-  opacity: 0.7;
-  transform: translate3d(calc(var(--px, 0px) * 0.16), calc(var(--py, 0px) * 0.16), 0);
+  opacity: 0.74;
+  transform: translate3d(calc(var(--px, 0px) * 0.18), calc(var(--py, 0px) * 0.18), 0);
   transition: transform 0.16s ease-out;
 }
 
 .terrazzo-speckles {
   z-index: 0;
-  opacity: 0.62;
-  background-image:
-    radial-gradient(circle, rgba(255,255,255,0.18) 0 1.4px, transparent 1.8px),
-    radial-gradient(circle, rgba(45,164,221,0.18) 0 1px, transparent 1.5px),
-    radial-gradient(circle, rgba(255,174,51,0.14) 0 1px, transparent 1.6px);
-  background-position: 0 0, 42px 26px, 88px 58px;
-  background-size: 128px 128px, 156px 156px, 188px 188px;
-  transform: translate3d(calc(var(--px, 0px) * -0.08), calc(var(--py, 0px) * -0.08), 0);
+  opacity: 0.58;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.52) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgba(226,138,94,.48) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 80%, rgba(109,153,150,.52) 0 1px, transparent 2px),
+    radial-gradient(circle at 85% 24%, rgba(240,196,103,.48) 0 1px, transparent 2px),
+    radial-gradient(circle at 30% 72%, rgba(159,192,207,.45) 0 1px, transparent 2px),
+    radial-gradient(circle at 58% 18%, rgba(217,184,181,.4) 0 1px, transparent 2px);
+  background-size: 54px 64px, 68px 58px, 82px 74px, 96px 86px, 112px 104px, 132px 118px;
+  transform: translate3d(calc(var(--px, 0px) * -0.12), calc(var(--py, 0px) * -0.12), 0);
   transition: transform 0.16s ease-out;
 }
 
@@ -964,29 +968,49 @@ body::before {
   --rx: 0px;
   --ry: 0px;
   --shine: 0;
-  --mx: 0.05;
-  --my: 0.05;
+  --mx: 0.2;
+  --my: 0.2;
   --r: 0deg;
+  --o: .36;
   position: absolute;
   display: block;
-  border-radius: 48% 52% 56% 44%;
-  background: rgba(255, 255, 255, 0.14);
+  border-radius: 58% 42% 62% 38% / 48% 56% 44% 52%;
+  background: var(--c);
+  width: var(--w);
+  height: var(--h);
+  opacity: calc(var(--o) + var(--shine));
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, calc(0.12 + var(--shine)));
   filter: brightness(calc(1 + var(--shine)));
   transform: translate3d(calc(var(--px, 0px) * var(--mx) + var(--rx)), calc(var(--py, 0px) * var(--my) + var(--ry)), 0) rotate(var(--r));
   transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.18s ease, box-shadow 0.18s ease;
-  animation: floatChip 13s ease-in-out infinite alternate;
+  animation: floatChip var(--d, 9s) ease-in-out infinite alternate;
 }
 
-.tz-a{width:86px;height:34px;left:4%;top:12%;--r:-18deg;--mx:.09;--my:.05;background:rgba(108,126,128,.18)}
-.tz-b{width:64px;height:28px;left:15%;top:76%;--r:-31deg;--mx:-.05;--my:.08;background:rgba(128,70,58,.2);animation-duration:15s}
-.tz-c{width:58px;height:58px;left:31%;top:20%;--r:18deg;--mx:.04;--my:-.06;background:rgba(203,161,89,.16);border-radius:42% 58% 46% 54%;animation-duration:11s}
-.tz-d{width:92px;height:42px;left:64%;top:17%;--r:23deg;--mx:-.08;--my:.04;background:rgba(135,151,157,.16)}
-.tz-e{width:76px;height:30px;left:83%;top:39%;--r:6deg;--mx:.07;--my:.07;background:rgba(105,59,50,.19);animation-duration:12s}
-.tz-f{width:92px;height:44px;left:80%;top:84%;--r:12deg;--mx:-.06;--my:-.05;background:rgba(125,132,126,.18);animation-duration:16s}
-.tz-g{width:48px;height:22px;left:19%;top:45%;--r:-10deg;--mx:.08;--my:-.08;background:rgba(78,119,122,.2)}
-.tz-h{width:72px;height:30px;left:48%;top:9%;--r:-34deg;--mx:-.04;--my:.06;background:rgba(177,158,122,.16)}
-.tz-i{width:44px;height:26px;left:68%;top:51%;--r:14deg;--mx:.05;--my:-.04;background:rgba(151,164,166,.18);animation-duration:10s}
+.tz-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,.28), transparent 55%);
+  mix-blend-mode: screen;
+}
+
+.tz-a{--c:#4f7772;--w:70px;--h:54px;--o:.46;--r:-24deg;--mx:.45;--my:.28;--d:8s;left:6%;top:12%}
+.tz-b{--c:#e28a5e;--w:44px;--h:32px;--o:.42;--r:18deg;--mx:-.3;--my:.4;--d:7s;left:18%;top:21%}
+.tz-c{--c:#ead09b;--w:58px;--h:34px;--o:.38;--r:-38deg;--mx:.25;--my:-.35;--d:9s;left:39%;top:10%}
+.tz-d{--c:#bfd1dc;--w:64px;--h:40px;--o:.36;--r:32deg;--mx:-.46;--my:.18;--d:10s;right:18%;top:16%}
+.tz-e{--c:#9b4e37;--w:48px;--h:32px;--o:.4;--r:12deg;--mx:.34;--my:-.28;--d:8.5s;right:7%;top:30%}
+.tz-f{--c:#d9b8b5;--w:42px;--h:52px;--o:.34;--r:-14deg;--mx:-.2;--my:.34;--d:9.2s;left:14%;top:43%}
+.tz-g{--c:#343537;--w:64px;--h:50px;--o:.34;--r:-26deg;--mx:.38;--my:.22;--d:7.8s;left:34%;top:48%}
+.tz-h{--c:#e8b28f;--w:54px;--h:38px;--o:.45;--r:20deg;--mx:-.44;--my:-.2;--d:8.8s;right:28%;top:47%}
+.tz-i{--c:#6d9996;--w:78px;--h:46px;--o:.36;--r:-10deg;--mx:.26;--my:-.42;--d:10s;right:8%;top:58%}
+.tz-j{--c:#f0c467;--w:44px;--h:70px;--o:.42;--r:23deg;--mx:-.28;--my:.34;--d:9.5s;left:22%;bottom:23%}
+.tz-k{--c:#7b7a7d;--w:34px;--h:25px;--o:.35;--r:-18deg;--mx:.42;--my:.24;--d:6.8s;left:52%;bottom:26%}
+.tz-l{--c:#e46f49;--w:50px;--h:32px;--o:.42;--r:-34deg;--mx:-.36;--my:.22;--d:8s;left:7%;bottom:13%}
+.tz-m{--c:#e6d8bd;--w:60px;--h:38px;--o:.36;--r:18deg;--mx:.32;--my:-.3;--d:9s;right:21%;bottom:15%}
+.tz-n{--c:#9fc0cf;--w:62px;--h:44px;--o:.34;--r:-8deg;--mx:-.42;--my:.24;--d:10s;right:5%;bottom:8%}
+.tz-o{--c:#fff;--w:34px;--h:20px;--o:.18;--r:22deg;--mx:.2;--my:.28;--d:7.2s;left:64%;top:28%}
+.tz-p{--c:#fff;--w:24px;--h:18px;--o:.16;--r:-16deg;--mx:-.2;--my:.18;--d:8.4s;left:29%;top:67%}
 
 @keyframes floatChip {
   from { margin-top: -4px; }
