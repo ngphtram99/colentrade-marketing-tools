@@ -89,47 +89,16 @@ function matchesStatus(order) {
   return true;
 }
 
-function parseOrderDate(value) {
-  const text = String(value || "").trim();
-  if (!text) return null;
-
-  const iso = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (iso) return new Date(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]));
-
-  const vn = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
-  if (vn) return new Date(Number(vn[3]), Number(vn[2]) - 1, Number(vn[1]));
-
-  const parsed = new Date(text);
-  return Number.isNaN(parsed.getTime()) ? null : parsed;
-}
-
-function parseInputDate(value, endOfDay = false) {
-  if (!value) return null;
-  const parts = value.split("-").map(Number);
-  if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
-  return new Date(parts[0], parts[1] - 1, parts[2], endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0);
-}
-
-function matchesDate(order) {
-  if (!state.dateFrom && !state.dateTo) return true;
-  const orderDate = parseOrderDate(order.date);
-  if (!orderDate) return false;
-
-  const from = parseInputDate(state.dateFrom);
-  const to = parseInputDate(state.dateTo, true);
-
-  if (from && orderDate < from) return false;
-  if (to && orderDate > to) return false;
-  return true;
-}
-
 function getFilteredOrders() {
   if (!state.data) return [];
 
   const search = state.search.toLowerCase();
+  const fromTime = state.dateFrom ? new Date(`${state.dateFrom}T00:00:00`).getTime() : null;
+  const toTime = state.dateTo ? new Date(`${state.dateTo}T23:59:59`).getTime() : null;
 
   return state.data.orders.filter(order => {
     const matchesRegion = !state.region || order.sheet === state.region;
+    const orderTime = parseOrderDate(order.date);
     const searchText = [
       order.orderCode,
       order.customer,
@@ -138,8 +107,25 @@ function getFilteredOrders() {
       order.product
     ].join(" ").toLowerCase();
 
-    return matchesRegion && matchesStatus(order) && matchesDate(order) && (!search || searchText.includes(search));
+    const matchesDateFrom = !fromTime || !orderTime || orderTime >= fromTime;
+    const matchesDateTo = !toTime || !orderTime || orderTime <= toTime;
+
+    return matchesRegion && matchesStatus(order) && matchesDateFrom && matchesDateTo && (!search || searchText.includes(search));
   });
+}
+
+function parseOrderDate(value) {
+  if (!value) return null;
+  const text = String(value).trim();
+  const match = text.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{4})$/);
+  if (match) {
+    const [, day, month, year] = match;
+    const parsed = new Date(Number(year), Number(month) - 1, Number(day));
+    return Number.isNaN(parsed.getTime()) ? null : parsed.getTime();
+  }
+
+  const direct = new Date(text);
+  return Number.isNaN(direct.getTime()) ? null : direct.getTime();
 }
 
 function renderOverview() {
@@ -365,6 +351,12 @@ els.statusFilter.addEventListener("change", event => {
   render();
 });
 
+els.searchInput.addEventListener("input", event => {
+  state.search = event.target.value;
+  state.selectedOrderId = "";
+  render();
+});
+
 els.dateFromInput.addEventListener("change", event => {
   state.dateFrom = event.target.value;
   state.selectedOrderId = "";
@@ -373,12 +365,6 @@ els.dateFromInput.addEventListener("change", event => {
 
 els.dateToInput.addEventListener("change", event => {
   state.dateTo = event.target.value;
-  state.selectedOrderId = "";
-  render();
-});
-
-els.searchInput.addEventListener("input", event => {
-  state.search = event.target.value;
   state.selectedOrderId = "";
   render();
 });

@@ -6,25 +6,38 @@
     <title>MKT Report Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=11" />
+    <link rel="stylesheet" href="styles.css?v=12" />
   </head>
   <body>
+    <div class="terrazzo-bg" aria-hidden="true">
+      <i class="tz-chip tz-a"></i>
+      <i class="tz-chip tz-b"></i>
+      <i class="tz-chip tz-c"></i>
+      <i class="tz-chip tz-d"></i>
+      <i class="tz-chip tz-e"></i>
+      <i class="tz-chip tz-f"></i>
+      <i class="tz-chip tz-g"></i>
+      <i class="tz-chip tz-h"></i>
+      <i class="tz-chip tz-i"></i>
+    </div>
+    <div class="terrazzo-speckles" aria-hidden="true"></div>
+    <div class="terrazzo-vignette" aria-hidden="true"></div>
     <div class="app-shell">
       <main class="main">
         <section class="toolbar">
           <div class="brand compact-brand">
-            <div>
-              <h1>MKT Report Control</h1>
-              <p>Theo dõi hình ảnh thị trường</p>
-            </div>
+          <div>
+            <h1>MKT Report Control</h1>
+            <p>Theo dõi hình ảnh thị trường</p>
           </div>
+        </div>
 
-          <nav class="tabs" aria-label="Dashboard tabs">
-            <button class="tab is-active" data-tab="overview">Tổng quan</button>
-            <button class="tab" data-tab="orders">Tất cả phiếu</button>
-            <button class="tab" data-tab="missing">Cần xử lý</button>
-            <button class="tab" data-tab="gallery">Duyệt hình</button>
-          </nav>
+        <nav class="tabs" aria-label="Dashboard tabs">
+          <button class="tab is-active" data-tab="overview">Tổng quan</button>
+          <button class="tab" data-tab="orders">Tất cả phiếu</button>
+          <button class="tab" data-tab="missing">Cần xử lý</button>
+          <button class="tab" data-tab="gallery">Duyệt hình</button>
+        </nav>
         </section>
 
         <header class="topbar">
@@ -172,9 +185,8 @@
             </div>
           </div>
         </section>
+        <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
       </main>
-
-      <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
 
     </div>
 
@@ -183,6 +195,55 @@
       <img id="previewImage" alt="" />
     </dialog>
 
-    <script src="app.js?v=10"></script>
+    <script>
+      (() => {
+        const chips = [...document.querySelectorAll(".tz-chip")];
+        let frame = 0;
+        const reset = () => {
+          document.documentElement.style.setProperty("--px", "0px");
+          document.documentElement.style.setProperty("--py", "0px");
+          chips.forEach((chip) => {
+            chip.style.setProperty("--rx", "0px");
+            chip.style.setProperty("--ry", "0px");
+            chip.style.setProperty("--shine", "0");
+          });
+        };
+
+        document.addEventListener("pointermove", (event) => {
+          if (frame) cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(() => {
+            const driftX = (event.clientX / window.innerWidth - 0.5) * 44;
+            const driftY = (event.clientY / window.innerHeight - 0.5) * 34;
+            document.documentElement.style.setProperty("--px", `${driftX}px`);
+            document.documentElement.style.setProperty("--py", `${driftY}px`);
+
+            chips.forEach((chip) => {
+              const rect = chip.getBoundingClientRect();
+              const cx = rect.left + rect.width / 2;
+              const cy = rect.top + rect.height / 2;
+              const dx = cx - event.clientX;
+              const dy = cy - event.clientY;
+              const distance = Math.hypot(dx, dy);
+              const reach = 170;
+
+              if (distance < reach) {
+                const power = (1 - distance / reach) * 32;
+                const angle = Math.atan2(dy, dx);
+                chip.style.setProperty("--rx", `${Math.cos(angle) * power}px`);
+                chip.style.setProperty("--ry", `${Math.sin(angle) * power}px`);
+                chip.style.setProperty("--shine", String(0.24 + power / 90));
+              } else {
+                chip.style.setProperty("--rx", "0px");
+                chip.style.setProperty("--ry", "0px");
+                chip.style.setProperty("--shine", "0");
+              }
+            });
+          });
+        });
+
+        document.addEventListener("pointerleave", reset);
+      })();
+    </script>
+    <script src="app.js?v=11"></script>
   </body>
 </html>

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Định Mức Cấp Mẫu — DSM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
   --bg:       #06101a;
@@ -36,31 +36,63 @@
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
+  position:relative;
+  overflow-x:hidden;
   font-family:'Inter',system-ui,sans-serif;
   font-size:14px;line-height:1.5;
-  background:var(--bg);color:var(--t1);
+  background:
+    radial-gradient(circle at 30% -12%, rgba(45,164,221,0.16), transparent 34%),
+    radial-gradient(circle at 92% 24%, rgba(4,54,79,0.24), transparent 38%),
+    linear-gradient(180deg,#06111d 0%,#071521 54%,#050d16 100%);
+  color:var(--t1);
   min-height:100vh;
   -webkit-font-smoothing:antialiased;
-  /* subtle grid */
-  background-image:
-    linear-gradient(rgba(45,164,221,0.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(45,164,221,0.025) 1px,transparent 1px);
-  background-size:32px 32px;
 }
 
 /* ambient glow top */
 body::before{
-  content:'';position:fixed;top:-120px;left:50%;transform:translateX(-50%);
-  width:600px;height:300px;
-  background:radial-gradient(ellipse,rgba(5,70,104,0.35) 0%,transparent 70%);
+  content:'';position:fixed;inset:0;
+  background:
+    linear-gradient(rgba(45,164,221,0.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(45,164,221,0.035) 1px,transparent 1px);
+  background-size:36px 36px;
   pointer-events:none;z-index:0;
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.86),rgba(0,0,0,.38));
 }
+
+.terrazzo-bg,.terrazzo-speckles,.terrazzo-vignette{position:fixed;inset:-80px;pointer-events:none}
+.terrazzo-bg{z-index:0;opacity:.7;transform:translate3d(calc(var(--px,0px)*.16),calc(var(--py,0px)*.16),0);transition:transform .16s ease-out}
+.terrazzo-speckles{z-index:0;opacity:.62;background-image:radial-gradient(circle,rgba(255,255,255,.18) 0 1.4px,transparent 1.8px),radial-gradient(circle,rgba(45,164,221,.18) 0 1px,transparent 1.5px),radial-gradient(circle,rgba(255,174,51,.14) 0 1px,transparent 1.6px);background-position:0 0,42px 26px,88px 58px;background-size:128px 128px,156px 156px,188px 188px;transform:translate3d(calc(var(--px,0px)*-.08),calc(var(--py,0px)*-.08),0);transition:transform .16s ease-out}
+.terrazzo-vignette{z-index:0;inset:0;background:radial-gradient(circle at center,transparent 12%,rgba(1,8,14,.45) 100%)}
+.tz-chip{--rx:0px;--ry:0px;--shine:0;--mx:.05;--my:.05;--tr:0deg;position:absolute;display:block;border-radius:48% 52% 56% 44%;background:rgba(255,255,255,.14);box-shadow:0 24px 48px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,calc(.12 + var(--shine)));filter:brightness(calc(1 + var(--shine)));transform:translate3d(calc(var(--px,0px)*var(--mx) + var(--rx)),calc(var(--py,0px)*var(--my) + var(--ry)),0) rotate(var(--tr));transition:transform .22s cubic-bezier(.2,.8,.2,1),filter .18s ease,box-shadow .18s ease;animation:floatChip 13s ease-in-out infinite alternate}
+.tz-a{width:86px;height:34px;left:4%;top:12%;--tr:-18deg;--mx:.09;--my:.05;background:rgba(108,126,128,.18)}
+.tz-b{width:64px;height:28px;left:15%;top:76%;--tr:-31deg;--mx:-.05;--my:.08;background:rgba(128,70,58,.2);animation-duration:15s}
+.tz-c{width:58px;height:58px;left:31%;top:20%;--tr:18deg;--mx:.04;--my:-.06;background:rgba(203,161,89,.16);border-radius:42% 58% 46% 54%;animation-duration:11s}
+.tz-d{width:92px;height:42px;left:64%;top:17%;--tr:23deg;--mx:-.08;--my:.04;background:rgba(135,151,157,.16)}
+.tz-e{width:76px;height:30px;left:83%;top:39%;--tr:6deg;--mx:.07;--my:.07;background:rgba(105,59,50,.19);animation-duration:12s}
+.tz-f{width:92px;height:44px;left:80%;top:84%;--tr:12deg;--mx:-.06;--my:-.05;background:rgba(125,132,126,.18);animation-duration:16s}
+.tz-g{width:48px;height:22px;left:19%;top:45%;--tr:-10deg;--mx:.08;--my:-.08;background:rgba(78,119,122,.2)}
+.tz-h{width:72px;height:30px;left:48%;top:9%;--tr:-34deg;--mx:-.04;--my:.06;background:rgba(177,158,122,.16)}
+.tz-i{width:44px;height:26px;left:68%;top:51%;--tr:14deg;--mx:.05;--my:-.04;background:rgba(151,164,166,.18);animation-duration:10s}
+@keyframes floatChip{from{margin-top:-4px}to{margin-top:8px}}
 
 .app{position:relative;z-index:1;max-width:500px;margin:0 auto;padding:24px 18px 72px}
 
 /* TOPBAR */
 .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid var(--bd1)}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
+.bmark{
+  width:38px;height:38px;
+  background:#ffffff;
+  border:1px solid rgba(255,255,255,0.9);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+  flex:0 0 auto;
+  box-shadow:0 12px 28px rgba(0,0,0,0.26),0 0 18px rgba(45,164,221,0.18);
+}
+.bmark svg{width:14px;height:14px}
+.bmark img{width:100%;height:100%;object-fit:contain;padding:5px}
+.bmark .logo-fallback{font-size:10px;font-weight:700;color:var(--blue);font-family:'JetBrains Mono',monospace}
 .bname{font-size:17px;font-weight:650;color:var(--t1);letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bsub{font-size:12px;color:var(--t3);margin-top:2px;font-family:'JetBrains Mono',monospace;letter-spacing:0}
 .pill{
@@ -223,13 +255,14 @@ body::before{
 @keyframes ldot{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
 
 /* FOOTER */
-.footer{text-align:center;margin-top:34px;padding-top:18px;border-top:1px solid var(--bd1);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:none;font-family:'JetBrains Mono',monospace}
+.footer{text-align:center;margin-top:34px;padding-top:18px;border-top:1px solid var(--bd1);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
 .footer-copy{display:block;margin-top:7px;letter-spacing:0;text-transform:none;color:var(--t2)}
 
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media(max-width:420px){
   .app{padding:18px 14px 64px}
   .topbar{align-items:flex-start;gap:12px}
+  .bmark{width:34px;height:34px}
   .bname{font-size:15px}
   .pill{padding:5px 9px}
 }
@@ -237,10 +270,27 @@ body::before{
 </style>
 </head>
 <body>
+<div class="terrazzo-bg" aria-hidden="true">
+  <i class="tz-chip tz-a"></i>
+  <i class="tz-chip tz-b"></i>
+  <i class="tz-chip tz-c"></i>
+  <i class="tz-chip tz-d"></i>
+  <i class="tz-chip tz-e"></i>
+  <i class="tz-chip tz-f"></i>
+  <i class="tz-chip tz-g"></i>
+  <i class="tz-chip tz-h"></i>
+  <i class="tz-chip tz-i"></i>
+</div>
+<div class="terrazzo-speckles" aria-hidden="true"></div>
+<div class="terrazzo-vignette" aria-hidden="true"></div>
 <div class="app">
 
   <header class="topbar">
     <div class="brand">
+      <div class="bmark">
+        <img src="company-logo.png" alt="Company logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+        <span class="logo-fallback" style="display:none">DSM</span>
+      </div>
       <div>
         <div class="bname">Định Mức Cấp Mẫu</div>
         <div class="bsub" id="sub-text">connecting...</div>
@@ -291,6 +341,50 @@ body::before{
 </div>
 
 <script>
+(() => {
+  const chips = [...document.querySelectorAll('.tz-chip')];
+  let frame = 0;
+  const resetTerrazzo = () => {
+    document.documentElement.style.setProperty('--px', '0px');
+    document.documentElement.style.setProperty('--py', '0px');
+    chips.forEach(chip => {
+      chip.style.setProperty('--rx', '0px');
+      chip.style.setProperty('--ry', '0px');
+      chip.style.setProperty('--shine', '0');
+    });
+  };
+  document.addEventListener('pointermove', event => {
+    if (frame) cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(() => {
+      const driftX = (event.clientX / window.innerWidth - 0.5) * 44;
+      const driftY = (event.clientY / window.innerHeight - 0.5) * 34;
+      document.documentElement.style.setProperty('--px', `${driftX}px`);
+      document.documentElement.style.setProperty('--py', `${driftY}px`);
+      chips.forEach(chip => {
+        const rect = chip.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const dx = cx - event.clientX;
+        const dy = cy - event.clientY;
+        const distance = Math.hypot(dx, dy);
+        const reach = 170;
+        if (distance < reach) {
+          const power = (1 - distance / reach) * 32;
+          const angle = Math.atan2(dy, dx);
+          chip.style.setProperty('--rx', `${Math.cos(angle) * power}px`);
+          chip.style.setProperty('--ry', `${Math.sin(angle) * power}px`);
+          chip.style.setProperty('--shine', String(0.24 + power / 90));
+        } else {
+          chip.style.setProperty('--rx', '0px');
+          chip.style.setProperty('--ry', '0px');
+          chip.style.setProperty('--shine', '0');
+        }
+      });
+    });
+  });
+  document.addEventListener('pointerleave', resetTerrazzo);
+})();
+
 const API = 'https://script.google.com/macros/s/AKfycbzByBKq9qOmA8HmWj_fODpsUkTG5CHrxcMF0DsI27zg0EL9sQHtmI87-maho6oFkctV/exec';
 let KH = [], selRegion = '', currentTab = 'kh';
 
