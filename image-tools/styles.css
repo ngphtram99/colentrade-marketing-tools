@@ -924,7 +924,7 @@ body::before {
     radial-gradient(circle, rgba(255, 255, 255, 0.08) 0 1px, transparent 1.6px);
   background-position: 0 0, 44px 38px;
   background-size: 88px 88px, 118px 118px;
-  opacity: 0.55;
+  opacity: 0.42;
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.86), rgba(0, 0, 0, 0.42));
 }
 
@@ -945,15 +945,13 @@ body::before {
 
 .terrazzo-speckles {
   z-index: 0;
-  opacity: 0.58;
+  opacity: 0.34;
   background:
-    radial-gradient(circle at 20% 30%, rgba(255,255,255,.52) 0 1px, transparent 2px),
-    radial-gradient(circle at 70% 60%, rgba(226,138,94,.48) 0 1px, transparent 2px),
-    radial-gradient(circle at 45% 80%, rgba(109,153,150,.52) 0 1px, transparent 2px),
-    radial-gradient(circle at 85% 24%, rgba(240,196,103,.48) 0 1px, transparent 2px),
-    radial-gradient(circle at 30% 72%, rgba(159,192,207,.45) 0 1px, transparent 2px),
-    radial-gradient(circle at 58% 18%, rgba(217,184,181,.4) 0 1px, transparent 2px);
-  background-size: 54px 64px, 68px 58px, 82px 74px, 96px 86px, 112px 104px, 132px 118px;
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,.48) 0 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgba(226,138,94,.42) 0 1px, transparent 2px),
+    radial-gradient(circle at 45% 80%, rgba(109,153,150,.46) 0 1px, transparent 2px),
+    radial-gradient(circle at 85% 24%, rgba(240,196,103,.42) 0 1px, transparent 2px);
+  background-size: 82px 96px, 112px 92px, 138px 118px, 168px 142px;
   transform: translate3d(calc(var(--px, 0px) * -0.12), calc(var(--py, 0px) * -0.12), 0);
   transition: transform 0.16s ease-out;
 }
