@@ -142,6 +142,15 @@ body::before{
 .chip{min-height:26px;padding:4px 10px;border-radius:999px;border:1px solid var(--bd1);background:rgba(10,25,41,0.42);color:var(--t3);font-size:11px;font-family:'Inter',sans-serif;cursor:pointer;transition:all .14s ease;white-space:nowrap}
 .chip:hover{border-color:var(--bd2);color:var(--t2)}
 .chip.on{background:rgba(5,70,104,0.9);border-color:var(--blue-b);color:#d6f2ff;box-shadow:0 8px 18px rgba(45,164,221,0.1)}
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.filter-field{display:flex;flex-direction:column;gap:5px}
+.filter-field label{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;letter-spacing:.08em;text-transform:uppercase}
+.filter-field select{
+  width:100%;min-height:38px;border-radius:9px;border:1px solid var(--bd1);
+  background:rgba(10,25,41,.78);color:var(--t1);padding:8px 10px;
+  font:600 13px Inter,sans-serif;outline:none;
+}
+.filter-field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(45,164,221,.11)}
 
 /* SUGGESTIONS */
 .sugw{background:var(--surface);border:1px solid var(--bd2);border-radius:10px;overflow:hidden;margin-bottom:10px;box-shadow:0 18px 44px rgba(0,0,0,0.42),0 0 0 1px rgba(45,164,221,0.05)}
@@ -189,10 +198,10 @@ body::before{
 
 /* METRICS */
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--bd1)}
-.met{padding:14px 10px;border-right:1px solid var(--bd1);text-align:center}
+.met{min-height:96px;padding:14px 10px;border-right:1px solid var(--bd1);text-align:center;display:flex;flex-direction:column;justify-content:center;align-items:center}
 .met:last-child{border-right:none}
-.met-l{font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px}
-.met-v{font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:-0.02em}
+.met-l{min-height:28px;font-size:9px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:0.09em;margin-bottom:6px;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.25}
+.met-v{font-size:18px;font-weight:600;font-family:'JetBrains Mono',monospace;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1.1}
 .mv-blue{color:var(--blue)}.mv-green{color:var(--green)}.mv-red{color:var(--red)}.mv-muted{color:var(--t2)}
 
 /* PROGRESS — ArcCast style */
@@ -224,10 +233,36 @@ body::before{
 }
 .prog-glow.active{opacity:0.5}
 
+/* EXPORT HISTORY */
+.hist-sec{border-top:1px solid var(--bd1);padding:14px 16px 16px}
+.hist-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.hist-title{font-size:12px;font-weight:650;color:var(--t1)}
+.hist-total{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.hist-list{display:grid;gap:8px}
+.hist-item{display:grid;grid-template-columns:76px 1fr auto;align-items:center;gap:10px;padding:10px 11px;border:1px solid var(--bd1);border-radius:9px;background:rgba(5,18,30,.58)}
+.hist-date{font-size:10px;color:var(--t2);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.hist-desc{min-width:0;font-size:11px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-money{font-size:11px;font-weight:700;color:var(--green);font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+.hist-empty{padding:11px;border:1px dashed var(--bd1);border-radius:9px;color:var(--t3);font-size:11px;text-align:center}
+
 /* STATS */
 .stats-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
 .stat{background:var(--surface);border:1px solid var(--bd1);border-radius:9px;padding:8px 12px;font-size:11px;color:var(--t2);font-family:'JetBrains Mono',monospace;box-shadow:0 8px 20px rgba(0,0,0,0.14)}
-.stat strong{color:var(--t1);font-weight:600}
+.stat-btn{appearance:none;cursor:pointer;transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;color:var(--t2);text-align:left}
+.stat-btn:hover,.stat-btn.on{border-color:var(--blue);box-shadow:0 10px 26px rgba(45,164,221,.16),0 0 0 1px rgba(45,164,221,.12);transform:translateY(-1px)}
+.stat strong{color:var(--t1);font-weight:600;font-variant-numeric:tabular-nums}
+.quick-list{background:var(--surface);border:1px solid var(--bd2);border-radius:12px;overflow:hidden;box-shadow:0 16px 44px rgba(0,0,0,.28)}
+.quick-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bd1)}
+.quick-title{font-size:13px;font-weight:650;color:var(--t1)}
+.quick-note{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+.quick-items{max-height:360px;overflow:auto}
+.quick-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--bd1);cursor:pointer;transition:background .12s ease}
+.quick-row:last-child{border-bottom:none}
+.quick-row:hover{background:rgba(45,164,221,.08)}
+.quick-name{font-size:13px;font-weight:650;color:var(--t1)}
+.quick-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.quick-values{display:flex;align-items:flex-end;flex-direction:column;gap:3px;flex-shrink:0;font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace;text-align:right;font-variant-numeric:tabular-nums}
+.quick-empty{padding:18px;text-align:center;color:var(--t3);font-size:12px}
 
 /* EMPTY — compact, no giant icon */
 .empty{text-align:center;padding:40px 20px;color:var(--t3)}
@@ -275,6 +310,8 @@ body::before{
   .bmark{width:34px;height:34px}
   .bname{font-size:15px}
   .pill{padding:5px 9px}
+  .hist-item{grid-template-columns:1fr;align-items:start}
+  .hist-money{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
 </style>
@@ -328,6 +365,20 @@ body::before{
   </div>
 
   <div id="tab-kh">
+    <div class="filters">
+      <div class="filter-field">
+        <label for="month-filter">DSM/Tháng</label>
+        <select id="month-filter" onchange="setMonth(this.value)" disabled>
+          <option value="">Tất cả</option>
+        </select>
+      </div>
+      <div class="filter-field">
+        <label for="region-filter">Miền/Khu vực</label>
+        <select id="region-filter" onchange="setRegion(this.value)" disabled>
+          <option value="">Tất cả</option>
+        </select>
+      </div>
+    </div>
     <div class="sw">
       <span class="sico">
         <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="6.5" cy="6.5" r="4"/><path d="m10 10 3 3"/></svg>
@@ -403,10 +454,12 @@ body::before{
 })();
 
 const API = 'https://script.google.com/macros/s/AKfycbzByBKq9qOmA8HmWj_fODpsUkTG5CHrxcMF0DsI27zg0EL9sQHtmI87-maho6oFkctV/exec';
-let KH = [], selRegion = '', currentTab = 'kh';
+const DEFAULT_MONTH_OPTIONS = ['4/2026', '5/2026', '6/2026', 'Tất cả'];
+const DEFAULT_REGION_OPTIONS = ['Hồ Chí Minh', 'Miền Đông', 'Miền Tây', 'Miền Trung', 'OEM', 'Miền Bắc', 'Tất cả'];
+let KH = [], SUMMARY = [], selRegion = '', selMonth = '', fallbackMonth = '', updatedAt = '', currentTab = 'kh', requestId = 0;
 
 function fmt(n) {
-  const v = parseFloat(String(n).replace(/[^\d.-]/g, '')) || 0;
+  const v = toNumber(n);
   const a = Math.abs(v);
   if (a >= 1e9) return (v/1e9).toFixed(2) + 'B';
   if (a >= 1e6) return (v/1e6).toFixed(2) + 'M';
@@ -420,16 +473,16 @@ function hl(text, q) {
   return text.slice(0,i) + '<mark>' + text.slice(i, i+q.length) + '</mark>' + text.slice(i+q.length);
 }
 function barColor(pct) {
-  if (pct >= 100) return 'var(--red)';
+  if (pct > 100) return 'var(--red)';
   if (pct >= 80)  return 'var(--green)';
   if (pct >= 40)  return 'var(--blue)';
   return 'var(--t3)';
 }
 function getBadge(d) {
-  if (d.tt.includes('Vượt'))    return { cls: 'b-red',   label: 'Vượt ĐM' };
-  if (d.xuat <= 0)              return { cls: 'b-muted', label: 'Chưa xuất' };
-  if (d.xuat < d.dinh * 0.99)  return { cls: 'b-amber', label: 'Đã xuất một phần' };
-  return                               { cls: 'b-green', label: 'Đã xuất' };
+  if (d.vuot > 0 || isOverLimitStatus(d.tt)) return { cls: 'b-red',   label: 'Vượt định mức' };
+  if (d.xuat <= 0)                         return { cls: 'b-muted', label: 'Chưa xuất' };
+  if (d.xuat < d.tong * 0.99)              return { cls: 'b-amber', label: 'Đã xuất một phần' };
+  return                                          { cls: 'b-green', label: 'Đã xuất' };
 }
 
 function normalizeKey(value) {
@@ -444,7 +497,42 @@ function normalizeKey(value) {
 }
 
 function toNumber(value) {
-  return parseFloat(String(value || '').replace(/[^\d.-]/g, '')) || 0;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : 0;
+  let text = String(value || '').trim();
+  if (!text) return 0;
+  const negative = /^\s*-/.test(text) || /\((.*)\)/.test(text);
+  text = text.replace(/[^\d.,-]/g, '').replace(/^-/, '');
+  const hasComma = text.includes(',');
+  const hasDot = text.includes('.');
+
+  if (hasComma && hasDot) {
+    const lastComma = text.lastIndexOf(',');
+    const lastDot = text.lastIndexOf('.');
+    if (lastComma > lastDot) {
+      text = text.replace(/\./g, '').replace(',', '.');
+    } else {
+      text = text.replace(/,/g, '');
+    }
+  } else if (hasDot) {
+    const parts = text.split('.');
+    text = parts.length > 1 && parts.every((part, index) => index === 0 || part.length === 3)
+      ? parts.join('')
+      : text;
+  } else if (hasComma) {
+    const parts = text.split(',');
+    text = parts.length > 1 && parts.every((part, index) => index === 0 || part.length === 3)
+      ? parts.join('')
+      : text.replace(',', '.');
+  }
+
+  const number = parseFloat(text);
+  if (!Number.isFinite(number)) return 0;
+  return negative ? -number : number;
+}
+
+function isOverLimitStatus(value) {
+  const key = normalizeKey(value);
+  return key.includes('VUOT') && !key.includes('CHUA VUOT');
 }
 
 function findHeaderRow(rows) {
@@ -475,20 +563,95 @@ function getObjectValue(row, aliases) {
   return '';
 }
 
+function normalizeRegion(value) {
+  const text = String(value || '').trim();
+  const key = normalizeKey(text);
+  if (!text || key === 'TAT CA') return '';
+  return key === 'DOC QUYEN' ? 'OEM' : text;
+}
+
+function normalizeMonth(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  if (normalizeKey(raw) === 'TAT CA') return '';
+  const dateMatch = raw.match(/^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})$/);
+  if (dateMatch) return `${Number(dateMatch[2])}/${dateMatch[3].length === 2 ? '20' + dateMatch[3] : dateMatch[3]}`;
+  const monthMatch = raw.match(/(?:T|THANG|THÁNG)?\s*(\d{1,2})\s*[\/.-]\s*(\d{2,4})/i);
+  if (monthMatch) return `${Number(monthMatch[1])}/${monthMatch[2].length === 2 ? '20' + monthMatch[2] : monthMatch[2]}`;
+  return raw;
+}
+
+function buildDsmRow(source) {
+  const tonDau = toNumber(source.tonDau);
+  const phatSinh = toNumber(source.phatSinh || source.dinh);
+  const tong = toNumber(source.tong || (tonDau + phatSinh));
+  const xuat = toNumber(source.xuat);
+  const tonCuoi = Math.max(tong - xuat, 0);
+  const vuot = Math.max(xuat - tong, 0);
+  const tt = vuot > 0 ? 'Vượt định mức' : 'Chưa vượt';
+  const history = Array.isArray(source.history) ? source.history.map(item => ({
+    date: String(item.date || '').trim(),
+    month: normalizeMonth(item.month),
+    amount: toNumber(item.amount),
+    amountText: String(item.amountText || '').trim(),
+    note: String(item.note || '').trim()
+  })).filter(item => item.date || item.amount) : [];
+
+  return {
+    month: normalizeMonth(source.month) || fallbackMonth,
+    region: normalizeRegion(source.region),
+    kh: String(source.kh || '').trim(),
+    tinh: String(source.tinh || '').trim(),
+    npp: String(source.npp || '').trim(),
+    tonDau,
+    phatSinh,
+    tong,
+    dinh: tong,
+    xuat,
+    tonCuoi,
+    con: tonCuoi,
+    vuot,
+    tt,
+    history
+  };
+}
+
+function buildSummaryRow(source) {
+  const tong = toNumber(source.tong);
+  const xuat = toNumber(source.xuat);
+  const con = Math.max(tong - xuat, 0);
+  const vuot = Math.max(xuat - tong, 0);
+  const pct = tong > 0 ? Math.round(xuat / tong * 100) : 0;
+  return {
+    region: normalizeRegion(source.region),
+    tong,
+    xuat,
+    con,
+    vuot,
+    pct,
+    tt: vuot > 0 ? 'Vượt định mức' : 'Chưa vượt'
+  };
+}
+
 function mapCapMauObjectRows(rows) {
   return rows.map(r => {
     const name = String(getObjectValue(r, ['KHACH HANG', 'KHÁCH HÀNG', 'Khach hang']) || '').trim();
     if (!name || name.toLowerCase().startsWith('tổng') || name.toLowerCase() === 'total') return null;
-    return {
-      region: String(getObjectValue(r, ['KHU VUC', 'Khu vực']) || '').trim(),
+    return buildDsmRow({
+      month: getObjectValue(r, ['DSM/THANG', 'DSM/Tháng', 'THANG', 'Tháng', 'Month']),
+      region: getObjectValue(r, ['MIEN/KHU VUC', 'MIỀN/KHU VỰC', 'KHU VUC', 'Khu vực']),
       kh: name,
-      tinh: String(getObjectValue(r, ['TINH/TP', 'Tỉnh/TP', 'Tinh TP']) || '').trim(),
-      npp: String(getObjectValue(r, ['NPP/DEALER', 'NPP Dealer']) || '').trim(),
-      dinh: toNumber(getObjectValue(r, ['TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc'])),
-      xuat: toNumber(getObjectValue(r, ['THUC XUAT', 'THỰC XUẤT', 'Da xuat'])),
-      con: toNumber(getObjectValue(r, ['CON LAI', 'CÒN LẠI'])),
-      tt: String(getObjectValue(r, ['TRANG THAI', 'TRẠNG THÁI']) || '').trim()
-    };
+      tinh: getObjectValue(r, ['TINH/TP', 'Tỉnh/TP', 'Tinh TP']),
+      npp: getObjectValue(r, ['NPP/DEALER', 'NPP Dealer']),
+      tonDau: getObjectValue(r, ['TON DAU KY', 'TỒN ĐẦU KỲ']),
+      phatSinh: getObjectValue(r, ['DINH MUC PHAT SINH', 'ĐỊNH MỨC PHÁT SINH']),
+      tong: getObjectValue(r, ['TONG DUOC SU DUNG', 'TỔNG ĐƯỢC SỬ DỤNG', 'TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc']),
+      xuat: getObjectValue(r, ['DA XUAT THANG NAY', 'ĐÃ XUẤT THÁNG NÀY', 'THUC XUAT', 'THỰC XUẤT', 'Da xuat']),
+      tonCuoi: getObjectValue(r, ['TON CUOI KY', 'TỒN CUỐI KỲ', 'CON LAI', 'CÒN LẠI']),
+      vuot: getObjectValue(r, ['VUOT DINH MUC', 'VƯỢT ĐỊNH MỨC']),
+      tt: getObjectValue(r, ['TRANG THAI', 'TRẠNG THÁI']),
+      history: r.exportHistory || r['Lịch sử xuất'] || []
+    });
   }).filter(Boolean);
 }
 
@@ -501,29 +664,71 @@ function mapCapMauArrayRows(rows) {
     if (key && headerMap[key] === undefined) headerMap[key] = index;
   });
 
-  const CM = getCol(headerMap, ['KHU VUC', 'Khu vực'], 1);
+  const CMO = getCol(headerMap, ['DSM/THANG', 'DSM/Tháng', 'THANG', 'Tháng', 'Month'], -1);
+  const CM = getCol(headerMap, ['MIEN/KHU VUC', 'MIỀN/KHU VỰC', 'KHU VUC', 'Khu vực'], 1);
   const CK = getCol(headerMap, ['KHACH HANG', 'KHÁCH HÀNG'], 2);
   const CT = getCol(headerMap, ['TINH/TP', 'Tỉnh/TP', 'Tinh TP'], 3);
   const CN = getCol(headerMap, ['NPP/DEALER', 'NPP Dealer'], 4);
-  const CD = getCol(headerMap, ['TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc'], 5);
-  const CX = getCol(headerMap, ['THUC XUAT', 'THỰC XUẤT', 'Da xuat'], 7);
-  const CC = getCol(headerMap, ['CON LAI', 'CÒN LẠI'], 8);
+  const CTD = getCol(headerMap, ['TON DAU KY', 'TỒN ĐẦU KỲ'], -1);
+  const CD = getCol(headerMap, ['DINH MUC PHAT SINH', 'ĐỊNH MỨC PHÁT SINH', 'TONG TIEN CAP MAU', 'TỔNG TIỀN CẤP MẪU', 'Dinh muc'], 5);
+  const CTONG = getCol(headerMap, ['TONG DUOC SU DUNG', 'TỔNG ĐƯỢC SỬ DỤNG'], -1);
+  const CX = getCol(headerMap, ['DA XUAT THANG NAY', 'ĐÃ XUẤT THÁNG NÀY', 'THUC XUAT', 'THỰC XUẤT', 'Da xuat'], 6);
+  const CC = getCol(headerMap, ['TON CUOI KY', 'TỒN CUỐI KỲ', 'CON LAI', 'CÒN LẠI'], 7);
+  const CV = getCol(headerMap, ['VUOT DINH MUC', 'VƯỢT ĐỊNH MỨC'], 8);
   const CTT = getCol(headerMap, ['TRANG THAI', 'TRẠNG THÁI'], 9);
 
   return rows.slice(headerRow + 1).map(r => {
     const name = String(r[CK] || '').trim();
     if (!name || name.toLowerCase().startsWith('tổng') || name.toLowerCase() === 'total') return null;
-    return {
-      region: String(r[CM] || '').trim(),
+    return buildDsmRow({
+      month: CMO >= 0 ? r[CMO] : '',
+      region: r[CM],
       kh: name,
-      tinh: String(r[CT] || '').trim(),
-      npp: String(r[CN] || '').trim(),
-      dinh: toNumber(r[CD]),
-      xuat: toNumber(r[CX]),
-      con: toNumber(r[CC]),
-      tt: String(r[CTT] || '').trim()
-    };
+      tinh: r[CT],
+      npp: r[CN],
+      tonDau: CTD >= 0 ? r[CTD] : 0,
+      phatSinh: r[CD],
+      tong: CTONG >= 0 ? r[CTONG] : '',
+      xuat: r[CX],
+      tonCuoi: r[CC],
+      vuot: r[CV],
+      tt: r[CTT]
+    });
   }).filter(Boolean);
+}
+
+function mapSummaryObjectRows(rows) {
+  return rows.map(r => {
+    const region = String(getObjectValue(r, ['MIEN/KHU VUC', 'MIỀN/KHU VỰC', 'KHU VUC', 'Khu vực']) || '').trim();
+    if (!region || region.toLowerCase().startsWith('tổng')) return null;
+    return buildSummaryRow({
+      region,
+      tong: getObjectValue(r, ['TONG DINH MUC', 'TỔNG ĐỊNH MỨC', 'TONG DUOC SU DUNG', 'TỔNG ĐƯỢC SỬ DỤNG']),
+      xuat: getObjectValue(r, ['DA XUAT', 'ĐÃ XUẤT', 'DA XUAT THANG NAY', 'ĐÃ XUẤT THÁNG NÀY']),
+      con: getObjectValue(r, ['CON LAI', 'CÒN LẠI', 'TON CUOI KY', 'TỒN CUỐI KỲ']),
+      vuot: getObjectValue(r, ['VUOT DINH MUC', 'VƯỢT ĐỊNH MỨC']),
+      tt: getObjectValue(r, ['TRANG THAI', 'TRẠNG THÁI'])
+    });
+  }).filter(Boolean);
+}
+
+function getVisibleKH() {
+  return KH;
+}
+
+function getStatRows(kind) {
+  const data = getVisibleKH();
+  if (kind === 'done') return data.filter(d => d.xuat > 0);
+  if (kind === 'none') return data.filter(d => d.xuat === 0);
+  if (kind === 'over') return data.filter(d => d.vuot > 0);
+  return data;
+}
+
+function statLabel(kind) {
+  if (kind === 'done') return 'Đã xuất';
+  if (kind === 'none') return 'Chưa xuất';
+  if (kind === 'over') return 'Vượt định mức';
+  return 'Tất cả khách hàng';
 }
 
 function setTab(t) {
@@ -537,14 +742,47 @@ function setTab(t) {
 }
 
 function loadData() {
-  window._dsm_cb = function(raw) {
+  const currentRequest = ++requestId;
+  setLoadingState(true);
+  const callbackName = `_dsm_cb_${currentRequest}`;
+  window[callbackName] = function(raw) {
+    if (currentRequest !== requestId) return;
     try { parseData(raw); }
     catch(e) { showError(); }
+    finally { delete window[callbackName]; }
   };
   const s = document.createElement('script');
   s.onerror = showError;
-  s.src = API + '?callback=_dsm_cb';
+  const params = new URLSearchParams({
+    callback: callbackName,
+    month: selMonth || 'Tất cả',
+    region: selRegion || 'Tất cả',
+    _: String(Date.now())
+  });
+  s.src = `${API}?${params.toString()}`;
   document.head.appendChild(s);
+}
+
+function setLoadingState(isLoading) {
+  const inp = document.getElementById('inp');
+  const mf = document.getElementById('month-filter');
+  const rf = document.getElementById('region-filter');
+  inp.disabled = isLoading;
+  inp.placeholder = isLoading ? 'Đang tải...' : 'Tìm theo tên khách hàng...';
+  mf.disabled = isLoading;
+  rf.disabled = isLoading;
+  document.getElementById('status-text').textContent = isLoading ? 'sync' : 'live';
+  document.getElementById('result-area').innerHTML = `
+    <div class="loader">
+      <div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+      <span>đang đọc REPORT V2...</span>
+    </div>`;
+  document.getElementById('region-area').innerHTML = `
+    <div class="loader">
+      <div class="ldots"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
+      <span>đang đọc REPORT V2...</span>
+    </div>`;
+  document.getElementById('sug-list').innerHTML = '';
 }
 function showError() {
   document.getElementById('status-text').textContent = 'offline';
@@ -555,29 +793,51 @@ function showError() {
 }
 
 function parseData(raw) {
+  fallbackMonth = normalizeMonth(raw.selectedMonth || raw.reportMonth || raw.month || selMonth);
+  selMonth = normalizeMonth(raw.selectedMonth || selMonth);
+  selRegion = normalizeRegion(raw.selectedRegion || selRegion);
+  updatedAt = String(raw.updatedAt || raw.updatedDate || '').trim();
   const objectRows = raw.capMauRows || [];
   const arrayRows = raw.capMau || [];
   KH = objectRows.length ? mapCapMauObjectRows(objectRows) : mapCapMauArrayRows(arrayRows);
+  SUMMARY = mapSummaryObjectRows(raw.summaryRows || raw.byRegionDsm || raw.regionSummary || []);
   const now = new Date();
-  document.getElementById('sub-text').textContent = `T${now.getMonth()+1}/${now.getFullYear()} · ${KH.length} KH`;
+  const labelMonth = fallbackMonth && fallbackMonth !== 'Tất cả' ? fallbackMonth : `T${now.getMonth()+1}/${now.getFullYear()}`;
+  document.getElementById('sub-text').textContent = `${labelMonth} · ${KH.length} KH${updatedAt ? ' · ' + updatedAt : ''}`;
   document.getElementById('status-text').textContent = 'live';
   const inp = document.getElementById('inp');
   inp.disabled = false; inp.placeholder = 'Tìm theo tên khách hàng...';
-  const regions = [...new Set(KH.map(d => d.region))].filter(Boolean);
-  document.getElementById('chips-region').innerHTML =
-    `<button class="chip on" onclick="setRegion('')">Tất cả</button>` +
-    regions.map(r => `<button class="chip" onclick="setRegion('${r.replace(/'/g,"\\'")}'">${r}</button>`).join('');
-  showEmpty();
+  const monthOptions = (raw.monthOptions && raw.monthOptions.length ? raw.monthOptions : DEFAULT_MONTH_OPTIONS)
+    .map(normalizeMonth);
+  const months = [...new Set(monthOptions.concat(KH.map(d => d.month)).concat(fallbackMonth))].filter(Boolean);
+  const mf = document.getElementById('month-filter');
+  mf.disabled = false;
+  mf.innerHTML = `<option value="">Tất cả</option>` + months.map(m => `<option value="${m}">${m}</option>`).join('');
+  mf.value = selMonth;
+
+  const regionOptions = (raw.regionOptions && raw.regionOptions.length ? raw.regionOptions : DEFAULT_REGION_OPTIONS)
+    .map(normalizeRegion);
+  const regions = [...new Set(regionOptions.concat(KH.map(d => d.region)).concat(SUMMARY.map(d => d.region)))].filter(Boolean);
+  const rf = document.getElementById('region-filter');
+  rf.disabled = false;
+  rf.innerHTML = `<option value="">Tất cả</option>` + regions.map(r => `<option value="${r}">${r}</option>`).join('');
+  rf.value = selRegion;
+  document.getElementById('chips-region').innerHTML = '';
+  if (currentTab === 'mien') renderRegions();
+  else showEmpty();
 }
 
 function showEmpty() {
-  const da = KH.filter(d => d.xuat > 0).length;
-  const ch = KH.filter(d => d.xuat === 0).length;
+  const data = getVisibleKH();
+  const da = data.filter(d => d.xuat > 0).length;
+  const ch = data.filter(d => d.xuat === 0).length;
+  const vu = data.filter(d => d.vuot > 0).length;
   document.getElementById('result-area').innerHTML = `
     <div class="stats-row">
-      <div class="stat">Total <strong>${KH.length}</strong></div>
-      <div class="stat">Đã xuất <strong style="color:var(--green)">${da}</strong></div>
-      <div class="stat">Chưa <strong style="color:var(--amber)">${ch}</strong></div>
+      <button class="stat stat-btn" type="button" onclick="showStatList('all')">Total <strong>${data.length}</strong></button>
+      <button class="stat stat-btn" type="button" onclick="showStatList('done')">Đã xuất <strong style="color:var(--green)">${da}</strong></button>
+      <button class="stat stat-btn" type="button" onclick="showStatList('none')">Chưa <strong style="color:var(--amber)">${ch}</strong></button>
+      <button class="stat stat-btn" type="button" onclick="showStatList('over')">Vượt <strong style="color:var(--red)">${vu}</strong></button>
     </div>
     <div class="empty">
       <svg class="empty-ico" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.2">
@@ -587,12 +847,52 @@ function showEmpty() {
     </div>`;
 }
 
+function showStatList(kind) {
+  const data = getVisibleKH();
+  const da = data.filter(d => d.xuat > 0).length;
+  const ch = data.filter(d => d.xuat === 0).length;
+  const vu = data.filter(d => d.vuot > 0).length;
+  const rows = getStatRows(kind);
+  document.getElementById('sug-list').innerHTML = '';
+  document.getElementById('result-area').innerHTML = `
+    <div class="stats-row">
+      <button class="stat stat-btn ${kind === 'all' ? 'on' : ''}" type="button" onclick="showStatList('all')">Total <strong>${data.length}</strong></button>
+      <button class="stat stat-btn ${kind === 'done' ? 'on' : ''}" type="button" onclick="showStatList('done')">Đã xuất <strong style="color:var(--green)">${da}</strong></button>
+      <button class="stat stat-btn ${kind === 'none' ? 'on' : ''}" type="button" onclick="showStatList('none')">Chưa <strong style="color:var(--amber)">${ch}</strong></button>
+      <button class="stat stat-btn ${kind === 'over' ? 'on' : ''}" type="button" onclick="showStatList('over')">Vượt <strong style="color:var(--red)">${vu}</strong></button>
+    </div>
+    <div class="quick-list">
+      <div class="quick-head">
+        <div class="quick-title">${statLabel(kind)}</div>
+        <div class="quick-note">${rows.length}/${data.length} KH</div>
+      </div>
+      <div class="quick-items">
+        ${rows.length ? rows.map(d => {
+          const idx = KH.indexOf(d);
+          const badge = getBadge(d);
+          return `<div class="quick-row" onclick="pickKH(${idx})">
+            <div>
+              <div class="quick-name">${d.kh}</div>
+              <div class="quick-meta">${d.region}${d.tinh ? ' · ' + d.tinh : ''}${d.npp ? ' · ' + d.npp : ''}</div>
+            </div>
+            <div class="quick-values">
+              <span class="badge ${badge.cls}">${badge.label}</span>
+              <span>dùng ${fmt(d.tong)} · xuất ${fmt(d.xuat)}${d.vuot ? ' · vượt ' + fmt(d.vuot) : ''}</span>
+            </div>
+          </div>`;
+        }).join('') : `<div class="quick-empty">Không có khách hàng trong nhóm này</div>`}
+      </div>
+    </div>`;
+}
+
+function setMonth(m) {
+  selMonth = normalizeMonth(m);
+  loadData();
+}
+
 function setRegion(r) {
-  selRegion = r;
-  document.querySelectorAll('#chips-region .chip').forEach(c =>
-    c.classList.toggle('on', c.textContent === (r || 'Tất cả'))
-  );
-  onSearch();
+  selRegion = normalizeRegion(r);
+  loadData();
 }
 
 function onSearch() {
@@ -601,7 +901,7 @@ function onSearch() {
   const sl = document.getElementById('sug-list');
   const ra = document.getElementById('result-area');
   if (!q) { sl.innerHTML = ''; showEmpty(); return; }
-  const matches = KH.filter(d =>
+  const matches = getVisibleKH().filter(d =>
     (!selRegion || d.region === selRegion) &&
     d.kh.toLowerCase().includes(q.toLowerCase())
   ).slice(0, 8);
@@ -626,12 +926,39 @@ function onSearch() {
   ra.innerHTML = '';
 }
 
+function renderExportHistory(d) {
+  const rows = (d.history || []).slice(0, 8);
+  const total = rows.reduce((sum, item) => sum + item.amount, 0);
+  if (!rows.length) {
+    return `<div class="hist-sec">
+      <div class="hist-head">
+        <div class="hist-title">Lịch sử đã xuất</div>
+        <div class="hist-total">0 lần</div>
+      </div>
+      <div class="hist-empty">Chưa có lịch sử xuất trong bộ lọc này</div>
+    </div>`;
+  }
+  return `<div class="hist-sec">
+    <div class="hist-head">
+      <div class="hist-title">Lịch sử đã xuất</div>
+      <div class="hist-total">${rows.length} lần · ${fmt(total)}</div>
+    </div>
+    <div class="hist-list">
+      ${rows.map(item => `<div class="hist-item">
+        <div class="hist-date">${item.date || '—'}</div>
+        <div class="hist-desc">${item.month ? 'DSM ' + item.month : 'Xuất DSM'}${item.note ? ' · ' + item.note : ''}</div>
+        <div class="hist-money">${item.amountText || fmt(item.amount)}</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
 function pickKH(idx) {
   const d = KH[idx];
   document.getElementById('inp').value = d.kh;
   document.getElementById('xbtn').style.display = 'flex';
   document.getElementById('sug-list').innerHTML = '';
-  const pct = d.dinh > 0 ? Math.round(d.xuat / d.dinh * 100) : 0;
+  const pct = d.tong > 0 ? Math.round(d.xuat / d.tong * 100) : 0;
   const bc  = barColor(pct);
   const badge = getBadge(d);
   document.getElementById('result-area').innerHTML = `
@@ -647,20 +974,24 @@ function pickKH(idx) {
         <span class="badge ${badge.cls}">${badge.label}</span>
       </div>
       <div class="metrics">
-        <div class="met"><div class="met-l">Định mức</div><div class="met-v mv-blue">${fmt(d.dinh)}</div></div>
-        <div class="met"><div class="met-l">Đã xuất</div><div class="met-v ${d.xuat>0?'mv-green':'mv-muted'}">${fmt(d.xuat)}</div></div>
-        <div class="met"><div class="met-l">Còn lại</div><div class="met-v ${d.con<0?'mv-red':'mv-muted'}">${fmt(d.con)}</div></div>
+        <div class="met"><div class="met-l">Tồn đầu kỳ</div><div class="met-v mv-muted">${fmt(d.tonDau)}</div></div>
+        <div class="met"><div class="met-l">Định mức mới</div><div class="met-v mv-blue">${fmt(d.phatSinh)}</div></div>
+        <div class="met"><div class="met-l">Tổng được dùng</div><div class="met-v mv-blue">${fmt(d.tong)}</div></div>
+        <div class="met"><div class="met-l">Đã xuất tháng này</div><div class="met-v ${d.xuat>0?'mv-green':'mv-muted'}">${fmt(d.xuat)}</div></div>
+        <div class="met"><div class="met-l">Tồn cuối kỳ</div><div class="met-v mv-muted">${fmt(d.tonCuoi)}</div></div>
+        <div class="met"><div class="met-l">Vượt định mức</div><div class="met-v ${d.vuot>0?'mv-red':'mv-muted'}">${fmt(d.vuot)}</div></div>
       </div>
       <div class="prog-sec">
         <div class="prog-top">
           <span class="prog-label">TỶ LỆ THỰC HIỆN</span>
           <span class="prog-pct" style="color:${bc}">${pct}%</span>
         </div>
-        <div class="prog-track">
+      <div class="prog-track">
           <div class="prog-bar" id="pbar" style="width:0%;background:${bc}"></div>
         </div>
         <div class="prog-glow" id="pglow" style="width:0%;background:${bc}"></div>
       </div>
+      ${renderExportHistory(d)}
     </div>`;
   requestAnimationFrame(() => {
     setTimeout(() => {
@@ -683,13 +1014,39 @@ function clearSearch() {
 function renderRegions() {
   const ra = document.getElementById('region-area');
   if (!KH.length) return;
-  const regions = [...new Set(KH.map(d => d.region))].filter(Boolean);
+  if (SUMMARY.length) {
+    ra.innerHTML = SUMMARY.map(row => {
+      const bc = barColor(row.pct);
+      return `<div class="rg">
+        <div class="rg-head">
+          <div class="rg-name">${row.region}</div>
+          <div class="rg-sum">${fmt(row.xuat)}/${fmt(row.tong)} · ${row.tt}</div>
+        </div>
+        <div class="rg-table">
+          <div class="rg-row sum-row">
+            <div class="row-info">
+              <div class="row-name dim">Tổng khu vực</div>
+              <div class="row-nums">định mức ${fmt(row.tong)} · đã xuất ${fmt(row.xuat)} · còn ${fmt(row.con)}${row.vuot ? ` · vượt ${fmt(row.vuot)}` : ''}</div>
+            </div>
+            <div class="row-right">
+              <div class="mini-track"><div class="mini-bar" style="width:${Math.min(row.pct,100)}%;background:${bc}"></div></div>
+              <div class="mini-pct" style="color:${bc}">${row.pct}%</div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  const visible = getVisibleKH();
+  const regions = [...new Set(visible.map(d => d.region))].filter(Boolean);
   let html = '';
   regions.forEach(region => {
-    const list  = KH.filter(d => d.region === region);
-    const tD    = list.reduce((s,d) => s+d.dinh, 0);
+    const list  = visible.filter(d => d.region === region);
+    const tD    = list.reduce((s,d) => s+d.tong, 0);
     const tX    = list.reduce((s,d) => s+d.xuat, 0);
-    const tC    = tD - tX;
+    const tC    = list.reduce((s,d) => s+d.tonCuoi, 0);
+    const tV    = list.reduce((s,d) => s+d.vuot, 0);
     const pct   = tD > 0 ? Math.round(tX/tD*100) : 0;
     const bc    = barColor(pct);
     const done  = list.filter(d => d.xuat > 0).length;
@@ -702,7 +1059,7 @@ function renderRegions() {
         <div class="rg-row sum-row">
           <div class="row-info">
             <div class="row-name dim">Tổng khu vực</div>
-            <div class="row-nums">${fmt(tD)} → ${fmt(tX)} · còn ${fmt(tC)}</div>
+            <div class="row-nums">dùng ${fmt(tD)} · xuất ${fmt(tX)} · tồn ${fmt(tC)} · vượt ${fmt(tV)}</div>
           </div>
           <div class="row-right">
             <div class="mini-track"><div class="mini-bar" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
@@ -710,17 +1067,17 @@ function renderRegions() {
           </div>
         </div>`;
     list.forEach(d => {
-      const p  = d.dinh > 0 ? Math.round(d.xuat/d.dinh*100) : 0;
+      const p  = d.tong > 0 ? Math.round(d.xuat/d.tong*100) : 0;
       const bc2 = barColor(p);
       const b = getBadge(d);
-      const showBadge = d.tt.includes('Vượt') || d.xuat === 0;
+      const showBadge = isOverLimitStatus(d.tt) || d.xuat === 0;
       html += `<div class="rg-row" onclick="goToKH(${KH.indexOf(d)})">
         <div class="row-info">
           <div class="row-name">
             ${d.kh}
             ${showBadge ? `<span class="badge ${b.cls}" style="font-size:9px;padding:1px 5px">${b.label}</span>` : ''}
           </div>
-          <div class="row-nums">${fmt(d.dinh)} → ${fmt(d.xuat)}</div>
+          <div class="row-nums">dùng ${fmt(d.tong)} → xuất ${fmt(d.xuat)} · tồn ${fmt(d.tonCuoi)}${d.vuot ? ` · vượt ${fmt(d.vuot)}` : ''}</div>
         </div>
         <div class="row-right">
           <div class="mini-track"><div class="mini-bar" style="width:${Math.min(p,100)}%;background:${bc2}"></div></div>
