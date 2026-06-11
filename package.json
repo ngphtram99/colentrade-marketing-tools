@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "rm -rf public && mkdir -p public && cp -R index.html assets dsm image-tools public/"
+    "build": "echo \"Static app ready\""
   },
   "dependencies": {
     "googleapis": "^144.0.0"

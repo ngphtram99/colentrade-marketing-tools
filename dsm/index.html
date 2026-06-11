@@ -303,6 +303,44 @@ body::before{
 .footer{text-align:center;margin-top:34px;padding-top:18px;border-top:1px solid var(--bd1);font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
 .footer-copy{display:block;margin-top:7px;letter-spacing:0;text-transform:none;color:var(--t2)}
 
+.auth-card{
+  background:linear-gradient(180deg,rgba(10,25,41,0.96),rgba(7,18,30,0.96));
+  border:1px solid var(--bd2);
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 24px 58px rgba(0,0,0,.36),0 0 0 1px rgba(45,164,221,.04);
+}
+.auth-kicker{font:600 10px 'JetBrains Mono',monospace;color:var(--blue);letter-spacing:.12em;text-transform:uppercase;margin-bottom:9px}
+.auth-title{font-size:20px;font-weight:750;color:var(--t1);letter-spacing:0;margin-bottom:6px}
+.auth-copy{font-size:13px;color:var(--t2);margin-bottom:16px}
+.auth-field{display:grid;gap:8px}
+.auth-field label{font:600 10px 'JetBrains Mono',monospace;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+.auth-input{
+  width:100%;min-height:44px;border-radius:10px;border:1px solid var(--bd1);
+  background:rgba(5,18,30,.72);color:var(--t1);padding:10px 12px;
+  font:650 15px Inter,sans-serif;outline:none;
+}
+.auth-input:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(45,164,221,.12)}
+.auth-actions{display:flex;align-items:center;gap:10px;margin-top:14px}
+.auth-btn{
+  appearance:none;border:1px solid var(--blue-b);border-radius:10px;
+  min-height:42px;padding:0 16px;background:linear-gradient(135deg,rgba(5,70,104,.98),rgba(10,90,130,.98));
+  color:#d6f2ff;font:750 13px Inter,sans-serif;cursor:pointer;
+  box-shadow:0 12px 26px rgba(45,164,221,.13);
+}
+.auth-btn:disabled{opacity:.45;cursor:not-allowed}
+.auth-note{font-size:11px;color:var(--t3)}
+.auth-error{display:none;margin-top:12px;padding:10px 11px;border:1px solid var(--red-b);border-radius:9px;background:var(--red-a);color:#ffb4b4;font-size:12px}
+.userbar{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  margin-bottom:14px;padding:9px 11px;border:1px solid var(--bd1);border-radius:10px;
+  background:rgba(10,25,41,.52);color:var(--t2);font-size:12px;
+}
+.userbar strong{color:var(--t1);font-weight:650}
+.logout-btn{appearance:none;border:1px solid var(--bd1);border-radius:7px;background:transparent;color:var(--t2);padding:5px 8px;font:650 11px Inter,sans-serif;cursor:pointer}
+.logout-btn:hover{border-color:var(--bd2);color:var(--t1)}
+[hidden]{display:none!important}
+
 :focus-visible{outline:2px solid var(--blue);outline-offset:2px}
 @media(max-width:420px){
   .app{padding:18px 14px 64px}
@@ -352,6 +390,27 @@ body::before{
     </div>
     <div class="pill"><div class="ldot"></div><span id="status-text">live</span></div>
   </header>
+
+  <section class="auth-card" id="auth-panel">
+    <div class="auth-kicker">Nội bộ</div>
+    <h1 class="auth-title">Nhập số điện thoại</h1>
+    <p class="auth-copy">DSM là dữ liệu nội bộ. Hệ thống sẽ kiểm tra quyền truy cập từ sheet Data_Nhan_Su.</p>
+    <div class="auth-field">
+      <label for="auth-phone">Số điện thoại</label>
+      <input class="auth-input" id="auth-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0901234567">
+    </div>
+    <div class="auth-actions">
+      <button class="auth-btn" id="auth-submit" type="button" onclick="submitAuth()">Truy cập</button>
+      <span class="auth-note">Cập nhật nhân sự trực tiếp trong Google Sheet.</span>
+    </div>
+    <div class="auth-error" id="auth-error">Bạn không có quyền truy cập chức năng này.</div>
+  </section>
+
+  <div id="secure-app" hidden>
+  <div class="userbar" id="userbar">
+    <span>Đang dùng quyền: <strong id="user-name">-</strong></span>
+    <button class="logout-btn" type="button" onclick="logoutAuth()">Đổi SĐT</button>
+  </div>
 
   <div class="seg" role="tablist">
     <button class="sbt on" onclick="setTab('kh')" role="tab">
@@ -406,6 +465,7 @@ body::before{
   </div>
 
   <footer class="footer">© 2026 Trade Marketing Tools v1.0</footer>
+  </div>
 </div>
 
 <script>
@@ -456,7 +516,9 @@ body::before{
 const API = 'https://script.google.com/macros/s/AKfycbzByBKq9qOmA8HmWj_fODpsUkTG5CHrxcMF0DsI27zg0EL9sQHtmI87-maho6oFkctV/exec';
 const DEFAULT_MONTH_OPTIONS = ['4/2026', '5/2026', '6/2026', 'Tất cả'];
 const DEFAULT_REGION_OPTIONS = ['Hồ Chí Minh', 'Miền Đông', 'Miền Tây', 'Miền Trung', 'OEM', 'Miền Bắc', 'Tất cả'];
+const AUTH_STORAGE_KEY = 'dsm-auth-phone';
 let KH = [], SUMMARY = [], selRegion = '', selMonth = '', fallbackMonth = '', updatedAt = '', currentTab = 'kh', requestId = 0;
+let authPhone = '', authUser = null;
 
 function fmt(n) {
   const v = toNumber(n);
@@ -741,6 +803,115 @@ function setTab(t) {
   if (t === 'mien') renderRegions();
 }
 
+function cleanPhone(value) {
+  return String(value || '').replace(/[^\d]/g, '');
+}
+
+function setAuthLoading(isLoading) {
+  const button = document.getElementById('auth-submit');
+  const input = document.getElementById('auth-phone');
+  if (button) {
+    button.disabled = isLoading;
+    button.textContent = isLoading ? 'Đang kiểm tra...' : 'Truy cập';
+  }
+  if (input) input.disabled = isLoading;
+}
+
+function showAuthError(message) {
+  const error = document.getElementById('auth-error');
+  error.textContent = message || 'Bạn không có quyền truy cập chức năng này.';
+  error.style.display = 'block';
+}
+
+function setAuthorized(auth) {
+  authUser = auth.user || {};
+  authPhone = cleanPhone(authUser.phone || authPhone);
+  localStorage.setItem(AUTH_STORAGE_KEY, authPhone);
+  document.getElementById('auth-panel').hidden = true;
+  document.getElementById('secure-app').hidden = false;
+  document.getElementById('user-name').textContent = authUser.name || authPhone;
+  loadData();
+}
+
+function requestAuth(phone, isLogin) {
+  const currentRequest = ++requestId;
+  setAuthLoading(true);
+  document.getElementById('auth-error').style.display = 'none';
+  const callbackName = `_dsm_auth_${currentRequest}`;
+  window[callbackName] = function(raw) {
+    try {
+      const auth = raw && raw.auth ? raw.auth : {};
+      if (auth.authorized) {
+        authPhone = cleanPhone(phone);
+        setAuthorized(auth);
+      } else {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        authPhone = '';
+        showAuthError(auth.message);
+      }
+    } catch(e) {
+      showAuthError('Không kiểm tra được quyền truy cập. Vui lòng thử lại.');
+    } finally {
+      setAuthLoading(false);
+      delete window[callbackName];
+    }
+  };
+  const s = document.createElement('script');
+  s.onerror = () => {
+    setAuthLoading(false);
+    showAuthError('Không kiểm tra được quyền truy cập. Vui lòng thử lại.');
+    delete window[callbackName];
+  };
+  const params = new URLSearchParams({
+    callback: callbackName,
+    authOnly: '1',
+    authPhone: cleanPhone(phone),
+    _: String(Date.now())
+  });
+  if (isLogin) params.set('authEvent', 'login');
+  s.src = `${API}?${params.toString()}`;
+  document.head.appendChild(s);
+}
+
+function submitAuth() {
+  const input = document.getElementById('auth-phone');
+  const phone = cleanPhone(input.value);
+  if (!phone) {
+    showAuthError('Vui lòng nhập số điện thoại.');
+    input.focus();
+    return;
+  }
+  requestAuth(phone, true);
+}
+
+function logoutAuth() {
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+  authPhone = '';
+  authUser = null;
+  KH = [];
+  SUMMARY = [];
+  document.getElementById('secure-app').hidden = true;
+  document.getElementById('auth-panel').hidden = false;
+  document.getElementById('auth-phone').disabled = false;
+  document.getElementById('auth-phone').value = '';
+  document.getElementById('auth-phone').focus();
+  document.getElementById('sub-text').textContent = 'locked';
+}
+
+function initAuth() {
+  const savedPhone = cleanPhone(localStorage.getItem(AUTH_STORAGE_KEY));
+  document.getElementById('sub-text').textContent = 'locked';
+  document.getElementById('auth-phone').addEventListener('keydown', event => {
+    if (event.key === 'Enter') submitAuth();
+  });
+  if (savedPhone) {
+    document.getElementById('auth-phone').value = savedPhone;
+    requestAuth(savedPhone, false);
+  } else {
+    document.getElementById('auth-phone').focus();
+  }
+}
+
 function loadData() {
   const currentRequest = ++requestId;
   setLoadingState(true);
@@ -755,6 +926,7 @@ function loadData() {
   s.onerror = showError;
   const params = new URLSearchParams({
     callback: callbackName,
+    authPhone: authPhone,
     month: selMonth || 'Tất cả',
     region: selRegion || 'Tất cả',
     _: String(Date.now())
@@ -793,6 +965,15 @@ function showError() {
 }
 
 function parseData(raw) {
+  if (raw && raw.auth && !raw.auth.authorized) {
+    logoutAuth();
+    showAuthError(raw.auth.message);
+    return;
+  }
+  if (raw && raw.auth && raw.auth.user) {
+    authUser = raw.auth.user;
+    document.getElementById('user-name').textContent = authUser.name || authPhone;
+  }
   fallbackMonth = normalizeMonth(raw.selectedMonth || raw.reportMonth || raw.month || selMonth);
   selMonth = normalizeMonth(raw.selectedMonth || selMonth);
   selRegion = normalizeRegion(raw.selectedRegion || selRegion);
@@ -823,8 +1004,24 @@ function parseData(raw) {
   rf.innerHTML = `<option value="">Tất cả</option>` + regions.map(r => `<option value="${r}">${r}</option>`).join('');
   rf.value = selRegion;
   document.getElementById('chips-region').innerHTML = '';
-  if (currentTab === 'mien') renderRegions();
-  else showEmpty();
+  const query = inp.value.trim();
+  if (currentTab === 'mien') {
+    renderRegions();
+  } else if (query) {
+    reopenCurrentSearch(query);
+  } else {
+    showEmpty();
+  }
+}
+
+function reopenCurrentSearch(query) {
+  const key = normalizeKey(query);
+  const exactIdx = KH.findIndex(d => normalizeKey(d.kh) === key);
+  if (exactIdx >= 0) {
+    pickKH(exactIdx);
+    return;
+  }
+  onSearch();
 }
 
 function showEmpty() {
@@ -1095,7 +1292,7 @@ function goToKH(idx) {
   requestAnimationFrame(() => pickKH(idx));
 }
 
-loadData();
+initAuth();
 </script>
 </body>
 </html>

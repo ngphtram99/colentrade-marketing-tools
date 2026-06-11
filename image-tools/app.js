@@ -59,6 +59,24 @@ function formatNumber(value) {
   return new Intl.NumberFormat("vi-VN").format(value || 0);
 }
 
+function formatVietnamDateTime(value) {
+  const text = String(value || "").trim();
+  if (!text) return "";
+  const direct = new Date(text);
+  if (!Number.isNaN(direct.getTime())) {
+    return new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    }).format(direct).replace(",", "");
+  }
+  return text;
+}
+
 function escapeHtml(value) {
   return String(value || "")
     .replace(/&/g, "&amp;")
@@ -325,7 +343,7 @@ async function loadData() {
     }
 
     state.data = data;
-    els.lastUpdated.textContent = `Cập nhật: ${new Date(data.generatedAt).toLocaleString("vi-VN")}`;
+    els.lastUpdated.textContent = `Cập nhật: ${formatVietnamDateTime(data.generatedAt)}`;
     render();
   } catch (err) {
     showError(err.message);

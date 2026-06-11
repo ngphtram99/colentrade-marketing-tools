@@ -52,30 +52,16 @@ function buildRanges(sheetNames) {
   return sheetNames.map(sheetName => `'${sheetName.replace(/'/g, "''")}'!A:Z`);
 }
 
-function getAppsScriptApiUrl(rawUrl, forceApi) {
-  const url = new URL(rawUrl);
-  if (forceApi || (url.hostname === "script.google.com" && !url.searchParams.has("api"))) {
-    url.searchParams.set("api", "1");
-  }
-  return url.toString();
-}
-
-async function fetchAppsScriptJson(rawUrl) {
-  const firstUrl = getAppsScriptApiUrl(rawUrl, false);
-  let response = await fetch(firstUrl);
-  let text = await response.text();
-  let isJson = text.trim().startsWith("{") || text.trim().startsWith("[");
-
-  if (!isJson) {
-    const retryUrl = getAppsScriptApiUrl(rawUrl, true);
-    if (retryUrl !== firstUrl) {
-      response = await fetch(retryUrl);
-      text = await response.text();
-      isJson = text.trim().startsWith("{") || text.trim().startsWith("[");
-    }
-  }
-
-  return { response, text, isJson };
+function formatVietnamDateTime(date) {
+  return new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false
+  }).format(date).replace(",", "");
 }
 
 module.exports = async function handler(req, res) {
@@ -86,15 +72,16 @@ module.exports = async function handler(req, res) {
 
   try {
     if (process.env.APPS_SCRIPT_API_URL) {
-      const { response, text, isJson } = await fetchAppsScriptJson(process.env.APPS_SCRIPT_API_URL);
+      const response = await fetch(process.env.APPS_SCRIPT_API_URL);
+      const text = await response.text();
+      const isJson = text.trim().startsWith("{") || text.trim().startsWith("[");
 
       res.statusCode = response.ok && isJson ? 200 : 502;
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader("Cache-Control", "no-store");
       res.end(isJson ? text : JSON.stringify({
-          error: "Apps Script chưa trả JSON. Kiểm tra link APPS_SCRIPT_API_URL phải là URL /exec của Web App, hoặc URL đó phải trả JSON khi thêm ?api=1.",
+          error: "Apps Script chưa trả JSON. Kiểm tra Web App đã deploy với quyền Anyone with the link chưa.",
           status: response.status,
-          contentType: response.headers.get("content-type") || "",
           preview: text.slice(0, 180)
         }));
       return;
@@ -229,7 +216,7 @@ module.exports = async function handler(req, res) {
     });
 
     json(res, 200, {
-      generatedAt: new Date().toISOString(),
+      generatedAt: formatVietnamDateTime(new Date()),
       sheetNames,
       summary,
       byRegion,
