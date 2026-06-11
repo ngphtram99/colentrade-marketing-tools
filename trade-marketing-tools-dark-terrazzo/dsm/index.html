@@ -855,6 +855,12 @@ function showAuthError(message) {
   error.style.display = 'block';
 }
 
+function formatAuthError(auth) {
+  const base = auth && auth.message ? auth.message : 'Bạn không có quyền truy cập chức năng này.';
+  const reason = auth && auth.reason ? ` (${auth.reason})` : '';
+  return base + reason;
+}
+
 function setAuthorized(auth) {
   authUser = auth.user || {};
   authPhone = cleanPhone(authUser.phone || authPhone);
@@ -879,7 +885,7 @@ function requestAuth(phone, isLogin) {
       } else {
         localStorage.removeItem(AUTH_STORAGE_KEY);
         authPhone = '';
-        showAuthError(auth.message);
+        showAuthError(formatAuthError(auth));
       }
     } catch(e) {
       showAuthError('Không kiểm tra được quyền truy cập. Vui lòng thử lại.');
@@ -999,7 +1005,7 @@ function showError() {
 function parseData(raw) {
   if (raw && raw.auth && !raw.auth.authorized) {
     logoutAuth();
-    showAuthError(raw.auth.message);
+    showAuthError(formatAuthError(raw.auth));
     return;
   }
   if (raw && raw.auth && raw.auth.user) {

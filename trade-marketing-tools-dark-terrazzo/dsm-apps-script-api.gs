@@ -232,6 +232,7 @@ function formatDateTime_(date) {
 
 function authorizeDsmUser_(ss, phone) {
   const normalizedPhone = normalizePhone_(phone);
+  const comparablePhone = normalizePhoneForCompare_(phone);
   if (!normalizedPhone) {
     return {
       authorized: false,
@@ -240,7 +241,7 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  const sheet = ss.getSheetByName(DSM_STAFF_SHEET_NAME);
+  const sheet = findSheetByNormalizedName_(ss, DSM_STAFF_SHEET_NAME);
   if (!sheet) {
     return {
       authorized: false,
@@ -283,7 +284,8 @@ function authorizeDsmUser_(ss, phone) {
 
   for (let i = headerRowIndex + 1; i < rows.length; i += 1) {
     const row = rows[i] || [];
-    if (normalizePhone_(row[phoneCol]) !== normalizedPhone) continue;
+    const rowPhone = normalizePhone_(row[phoneCol]);
+    if (rowPhone !== normalizedPhone && normalizePhoneForCompare_(row[phoneCol]) !== comparablePhone) continue;
 
     const status = statusCol >= 0 ? normalizeDsmKey_(row[statusCol]) : "ACTIVE";
     const isActive = !status || status === "ACTIVE" || status === "HOAT DONG" || status === "DANG LAM";
@@ -314,6 +316,15 @@ function authorizeDsmUser_(ss, phone) {
     reason: "not_found",
     message: "Bạn không có quyền truy cập chức năng này."
   };
+}
+
+function findSheetByNormalizedName_(ss, expectedName) {
+  const expectedKey = normalizeDsmKey_(expectedName);
+  const sheets = ss.getSheets();
+  for (let i = 0; i < sheets.length; i += 1) {
+    if (normalizeDsmKey_(sheets[i].getName()) === expectedKey) return sheets[i];
+  }
+  return null;
 }
 
 function findStaffHeaderRow_(rows) {
@@ -407,6 +418,11 @@ function findMappedColumn_(headerMap, aliases) {
 
 function normalizePhone_(phone) {
   return String(phone || "").replace(/[^\d]/g, "");
+}
+
+function normalizePhoneForCompare_(phone) {
+  const digits = normalizePhone_(phone);
+  return digits.replace(/^0+/, "");
 }
 
 function toDsmNumber_(value) {
