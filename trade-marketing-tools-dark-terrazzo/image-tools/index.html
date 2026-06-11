@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MKT Report Control</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=12" />
+  </head>
+  <body>
+    <div class="terrazzo-bg" aria-hidden="true">
+      <i class="tz-chip tz-a"></i>
+      <i class="tz-chip tz-b"></i>
+      <i class="tz-chip tz-c"></i>
+      <i class="tz-chip tz-d"></i>
+      <i class="tz-chip tz-e"></i>
+      <i class="tz-chip tz-f"></i>
+      <i class="tz-chip tz-g"></i>
+      <i class="tz-chip tz-h"></i>
+      <i class="tz-chip tz-i"></i>
+      <i class="tz-chip tz-j"></i>
+      <i class="tz-chip tz-k"></i>
+      <i class="tz-chip tz-l"></i>
+      <i class="tz-chip tz-m"></i>
+      <i class="tz-chip tz-n"></i>
+      <i class="tz-chip tz-o"></i>
+      <i class="tz-chip tz-p"></i>
+    </div>
+    <div class="terrazzo-speckles" aria-hidden="true"></div>
+    <div class="terrazzo-vignette" aria-hidden="true"></div>
+    <div class="app-shell">
+      <main class="main">
+        <section class="toolbar">
+          <div class="brand compact-brand">
+          <div>
+            <h1>MKT Report Control</h1>
+            <p>Theo dõi hình ảnh thị trường</p>
+          </div>
+        </div>
+
+        <nav class="tabs" aria-label="Dashboard tabs">
+          <button class="tab is-active" data-tab="overview">Tổng quan</button>
+          <button class="tab" data-tab="orders">Tất cả phiếu</button>
+          <button class="tab" data-tab="missing">Cần xử lý</button>
+          <button class="tab" data-tab="gallery">Duyệt hình</button>
+        </nav>
+        </section>
+
+        <header class="topbar">
+          <div class="page-heading">
+            <h2 id="pageTitle">Tổng quan</h2>
+            <p id="pageSubtitle">Tình trạng upload hình ảnh theo miền</p>
+          </div>
+          <div class="filters">
+            <label>
+              <span>Miền</span>
+              <select id="regionFilter">
+                <option value="">Tất cả</option>
+              </select>
+            </label>
+            <label>
+              <span>Trạng thái</span>
+              <select id="statusFilter">
+                <option value="">Tất cả</option>
+                <option value="missing">Thiếu hình</option>
+                <option value="uploaded">Đã upload</option>
+                <option value="pending">Chờ duyệt</option>
+                <option value="error">Lỗi folder</option>
+              </select>
+            </label>
+            <label>
+              <span>Từ ngày</span>
+              <input id="dateFromInput" type="date" />
+            </label>
+            <label>
+              <span>Đến ngày</span>
+              <input id="dateToInput" type="date" />
+            </label>
+            <label>
+              <span>Tìm kiếm</span>
+              <input id="searchInput" type="search" placeholder="Mã đơn, khách hàng, nhân viên" />
+            </label>
+            <button id="refreshBtn" class="primary-btn">Tải lại dữ liệu</button>
+            <p id="lastUpdated" class="last-updated">Chưa tải dữ liệu</p>
+          </div>
+        </header>
+
+        <section id="errorBox" class="error-box" hidden></section>
+
+        <section class="panel tab-panel is-active" id="overviewPanel">
+          <div class="metric-grid">
+            <article class="metric">
+              <span>Tổng phiếu</span>
+              <strong id="totalMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Đã upload</span>
+              <strong id="reportedMetric">0</strong>
+            </article>
+            <article class="metric warn">
+              <span>Chưa upload</span>
+              <strong id="notReportedMetric">0</strong>
+            </article>
+            <article class="metric danger">
+              <span>Thiếu hình</span>
+              <strong id="missingMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Chờ duyệt</span>
+              <strong id="pendingMetric">0</strong>
+            </article>
+            <article class="metric">
+              <span>Tỷ lệ upload</span>
+              <strong id="rateMetric">0%</strong>
+            </article>
+          </div>
+
+          <div class="region-grid" id="regionGrid"></div>
+
+          <div class="overview-split system-only">
+            <section class="work-panel">
+              <div class="section-title">
+                <h3>Vận hành</h3>
+                <span id="systemStatus">Đang đọc dữ liệu</span>
+              </div>
+              <div class="system-grid">
+                <div>
+                  <span>Folder lỗi</span>
+                  <strong id="folderErrorMetric">0</strong>
+                </div>
+                <div>
+                  <span>Tự tải lại</span>
+                  <strong>10 phút</strong>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="ordersPanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Sản phẩm</th>
+                  <th>Số ảnh</th>
+                  <th>Trạng thái</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="ordersBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="missingPanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Ghi chú</th>
+                </tr>
+              </thead>
+              <tbody id="missingBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="galleryPanel">
+          <div class="gallery-layout">
+            <div class="order-list" id="galleryOrders"></div>
+            <div class="gallery-view">
+              <div class="gallery-header">
+                <div>
+                  <h3 id="galleryTitle">Chọn một đơn để xem ảnh</h3>
+                  <p id="galleryMeta"></p>
+                </div>
+                <a id="openFolderLink" class="ghost-link" href="#" target="_blank" rel="noreferrer" hidden>Mở Drive</a>
+              </div>
+              <div class="image-grid" id="imageGrid"></div>
+            </div>
+          </div>
+        </section>
+        <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
+      </main>
+
+    </div>
+
+    <dialog id="previewDialog">
+      <button class="close-btn" id="closePreview" aria-label="Đóng">×</button>
+      <img id="previewImage" alt="" />
+    </dialog>
+
+    <script>
+      (() => {
+        const chips = [...document.querySelectorAll(".tz-chip")];
+        let frame = 0;
+        const reset = () => {
+          document.documentElement.style.setProperty("--px", "0px");
+          document.documentElement.style.setProperty("--py", "0px");
+          chips.forEach((chip) => {
+            chip.style.setProperty("--rx", "0px");
+            chip.style.setProperty("--ry", "0px");
+            chip.style.setProperty("--shine", "0");
+          });
+        };
+
+        document.addEventListener("pointermove", (event) => {
+          if (frame) cancelAnimationFrame(frame);
+          frame = requestAnimationFrame(() => {
+            const driftX = (event.clientX / window.innerWidth - 0.5) * 44;
+            const driftY = (event.clientY / window.innerHeight - 0.5) * 34;
+            document.documentElement.style.setProperty("--px", `${driftX}px`);
+            document.documentElement.style.setProperty("--py", `${driftY}px`);
+
+            chips.forEach((chip) => {
+              const rect = chip.getBoundingClientRect();
+              const cx = rect.left + rect.width / 2;
+              const cy = rect.top + rect.height / 2;
+              const dx = cx - event.clientX;
+              const dy = cy - event.clientY;
+              const distance = Math.hypot(dx, dy);
+              const reach = 190;
+
+              if (distance < reach) {
+                const power = (1 - distance / reach) * 52;
+                const angle = Math.atan2(dy, dx);
+                chip.style.setProperty("--rx", `${Math.cos(angle) * power}px`);
+                chip.style.setProperty("--ry", `${Math.sin(angle) * power}px`);
+                chip.style.setProperty("--shine", String(0.24 + power / 90));
+              } else {
+                chip.style.setProperty("--rx", "0px");
+                chip.style.setProperty("--ry", "0px");
+                chip.style.setProperty("--shine", "0");
+              }
+            });
+          });
+        });
+
+        document.addEventListener("pointerleave", reset);
+      })();
+    </script>
+    <script src="app.js?v=11"></script>
+  </body>
+</html>
