@@ -258,15 +258,20 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  const headers = rows[0].map(value => String(value || "").trim());
+  const headerRowIndex = findStaffHeaderRow_(rows);
+  const headers = rows[headerRowIndex].map(value => String(value || "").trim());
   const headerMap = buildHeaderMap_(headers);
-  const phoneCol = findMappedColumn_(headerMap, ["SDT", "SĐT", "SO DIEN THOAI", "DIEN THOAI", "PHONE"]);
-  const nameCol = findMappedColumn_(headerMap, ["HO TEN", "TEN", "NHAN SU", "NAME"]);
+  let phoneCol = findMappedColumn_(headerMap, ["SDT", "SĐT", "SO DIEN THOAI", "DIEN THOAI", "PHONE"]);
+  let nameCol = findMappedColumn_(headerMap, ["HO TEN", "TEN", "NHAN SU", "NAME"]);
   const deptCol = findMappedColumn_(headerMap, ["PHONG BAN", "BO PHAN", "DEPARTMENT"]);
   const titleCol = findMappedColumn_(headerMap, ["CHUC DANH", "CHUC VU", "TITLE"]);
   const regionCol = findMappedColumn_(headerMap, ["KHU VUC", "MIEN/KHU VUC", "MIEN", "REGION"]);
   const roleCol = findMappedColumn_(headerMap, ["VAI TRO", "ROLE"]);
   const statusCol = findMappedColumn_(headerMap, ["TRANG THAI", "STATUS"]);
+
+  // Fallbacks for compact staff sheets if headers are edited later.
+  if (phoneCol < 0) phoneCol = findLikelyPhoneColumn_(rows, headerRowIndex + 1);
+  if (nameCol < 0) nameCol = findLikelyNameColumn_(rows, headerRowIndex + 1, phoneCol);
 
   if (phoneCol < 0) {
     return {
@@ -276,7 +281,7 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  for (let i = 1; i < rows.length; i += 1) {
+  for (let i = headerRowIndex + 1; i < rows.length; i += 1) {
     const row = rows[i] || [];
     if (normalizePhone_(row[phoneCol]) !== normalizedPhone) continue;
 
@@ -309,6 +314,60 @@ function authorizeDsmUser_(ss, phone) {
     reason: "not_found",
     message: "Bạn không có quyền truy cập chức năng này."
   };
+}
+
+function findStaffHeaderRow_(rows) {
+  const required = ["SDT", "SĐT", "SO DIEN THOAI", "PHONE", "HO TEN", "TEN", "TRANG THAI", "VAI TRO"];
+  let bestIndex = 0;
+  let bestHits = -1;
+  const limit = Math.min(rows.length, 10);
+  for (let i = 0; i < limit; i += 1) {
+    const normalized = (rows[i] || []).map(normalizeDsmKey_);
+    const hits = required.filter(key => normalized.indexOf(normalizeDsmKey_(key)) !== -1).length;
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestIndex = i;
+    }
+    if (hits >= 2) return i;
+  }
+  return bestIndex;
+}
+
+function findLikelyPhoneColumn_(rows, startRow) {
+  const maxCols = Math.max.apply(null, rows.map(row => row.length));
+  let bestCol = -1;
+  let bestHits = 0;
+  for (let col = 0; col < maxCols; col += 1) {
+    let hits = 0;
+    for (let row = startRow; row < Math.min(rows.length, startRow + 25); row += 1) {
+      const phone = normalizePhone_(rows[row] && rows[row][col]);
+      if (phone.length >= 9 && phone.length <= 11) hits += 1;
+    }
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestCol = col;
+    }
+  }
+  return bestHits ? bestCol : -1;
+}
+
+function findLikelyNameColumn_(rows, startRow, phoneCol) {
+  const maxCols = Math.max.apply(null, rows.map(row => row.length));
+  let bestCol = -1;
+  let bestHits = 0;
+  for (let col = 0; col < maxCols; col += 1) {
+    if (col === phoneCol) continue;
+    let hits = 0;
+    for (let row = startRow; row < Math.min(rows.length, startRow + 25); row += 1) {
+      const text = String(rows[row] && rows[row][col] || "").trim();
+      if (text && !/^\d+$/.test(text)) hits += 1;
+    }
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestCol = col;
+    }
+  }
+  return bestHits ? bestCol : -1;
 }
 
 function logDsmAccess_(ss, user, e) {
