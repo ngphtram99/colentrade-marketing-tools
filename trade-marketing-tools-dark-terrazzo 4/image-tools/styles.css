@@ -683,7 +683,40 @@ tbody tr:hover {
 }
 
 .upload-controls input {
-  width: min(310px, 34vw);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.upload-pick-btn {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(45, 164, 221, 0.34);
+  border-radius: 8px;
+  padding: 0 14px;
+  background: rgba(45, 164, 221, 0.12);
+  color: var(--brand);
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform var(--motion), background var(--motion), color var(--motion), box-shadow var(--motion), border-color var(--motion);
+}
+
+.upload-pick-btn:hover {
+  transform: translateY(-1px);
+  border-color: rgba(45, 164, 221, 0.76);
+  background: rgba(45, 164, 221, 0.2);
+  box-shadow: 0 10px 24px rgba(45, 164, 221, 0.18);
+}
+
+.upload-controls input:disabled + .upload-pick-btn {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+  box-shadow: none;
 }
 
 .upload-controls .primary-btn {

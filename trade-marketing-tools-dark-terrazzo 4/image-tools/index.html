@@ -6,7 +6,7 @@
     <title>MKT Report Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=14" />
+    <link rel="stylesheet" href="styles.css?v=15" />
   </head>
   <body>
     <div class="terrazzo-bg" aria-hidden="true">
@@ -185,10 +185,11 @@
               <section class="upload-panel">
                 <div>
                   <h3>Upload hình trực tiếp</h3>
-                  <p id="uploadOrderMeta">Chọn một mã phiếu bên trái hoặc bấm “Xem / upload” ở bảng danh sách.</p>
+                  <p id="uploadOrderMeta">Chọn một mã phiếu bên trái hoặc bấm “+ Upload” ở bảng danh sách.</p>
                 </div>
                 <div class="upload-controls">
                   <input id="uploadFileInput" type="file" accept="image/*" multiple />
+                  <label class="upload-pick-btn" for="uploadFileInput">+ Chọn hình</label>
                   <button id="uploadBtn" class="primary-btn" type="button" disabled>Upload hình</button>
                 </div>
                 <p id="uploadMessage" class="upload-message" aria-live="polite"></p>
@@ -263,6 +264,6 @@
         document.addEventListener("pointerleave", reset);
       })();
     </script>
-    <script src="app.js?v=13"></script>
+    <script src="app.js?v=14"></script>
   </body>
 </html>

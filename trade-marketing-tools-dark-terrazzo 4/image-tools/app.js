@@ -227,7 +227,7 @@ function renderOrders() {
       <td>${formatNumber(order.imageCount)}/${formatNumber(order.imageLimit || 10)} ảnh</td>
       <td>${escapeHtml(order.lastImageUpdate || "")}</td>
       <td><span class="status ${statusClass(getImageStatus(order))}">${escapeHtml(getImageStatus(order))}</span></td>
-      <td><button class="view-btn" data-view="${escapeHtml(order.id)}">Xem / upload</button></td>
+      <td><button class="view-btn upload-action" data-view="${escapeHtml(order.id)}">+ Upload</button></td>
     </tr>
   `).join("");
 }
@@ -310,7 +310,7 @@ function renderUploadPanel(order) {
   els.uploadMessage.className = "upload-message";
 
   if (!order) {
-    els.uploadOrderMeta.textContent = "Chọn một mã phiếu bên trái hoặc bấm “Xem / upload” ở bảng danh sách.";
+    els.uploadOrderMeta.textContent = "Chọn một mã phiếu bên trái hoặc bấm “+ Upload” ở bảng danh sách.";
     els.uploadFileInput.disabled = true;
     els.uploadBtn.disabled = true;
     return;
@@ -319,9 +319,15 @@ function renderUploadPanel(order) {
   const limit = Number(order.imageLimit || 10);
   const count = Number(order.imageCount || 0);
   const remaining = Math.max(limit - count, 0);
-  els.uploadOrderMeta.textContent = `${order.orderCode} · ${order.customer || "Không có tên khách hàng"} · ${count}/${limit} ảnh · còn ${remaining} ảnh`;
+  els.uploadOrderMeta.textContent = `${order.orderCode} · ${order.customer || "Không có tên khách hàng"} · ${count}/${limit} ảnh · còn ${remaining} ảnh. Bấm “+ Chọn hình” để thêm ảnh.`;
   els.uploadFileInput.disabled = remaining <= 0 || !order.folderId;
   els.uploadBtn.disabled = remaining <= 0 || !order.folderId || !els.uploadFileInput.files.length;
+
+  if (!order.folderId) {
+    els.uploadMessage.textContent = "Phiếu này chưa có link thư mục Drive.";
+    els.uploadMessage.classList.add("is-error");
+    return;
+  }
 
   if (remaining <= 0) {
     els.uploadMessage.textContent = "Phiếu đã đạt giới hạn tối đa 10 hình ảnh.";
@@ -502,6 +508,9 @@ els.uploadFileInput.addEventListener("change", () => {
     els.uploadMessage.textContent = "Phiếu đã đạt giới hạn tối đa 10 hình ảnh.";
     els.uploadMessage.className = "upload-message is-error";
     els.uploadBtn.disabled = true;
+  } else if (fileCount > 0) {
+    els.uploadMessage.textContent = `Đã chọn ${formatNumber(fileCount)} ảnh. Bấm “Upload hình” để lưu lên Drive.`;
+    els.uploadMessage.className = "upload-message is-success";
   }
 });
 
