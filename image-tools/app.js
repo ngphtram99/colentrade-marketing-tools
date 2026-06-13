@@ -91,6 +91,9 @@ function showError(message) {
   els.errorBox.textContent = message || "";
 }
 
+// API mới dùng sourceSheet, cũ dùng sheet — normalize
+function getSheet(order) { return order.sourceSheet || order.sheet || ""; }
+
 function getOperationalStatus(order) {
   if (order.status === "Lỗi folder") return "Lỗi folder";
   if (order.imageCount === 0) return "Thiếu hình";
@@ -115,7 +118,7 @@ function getFilteredOrders() {
   const toTime = state.dateTo ? new Date(`${state.dateTo}T23:59:59`).getTime() : null;
 
   return state.data.orders.filter(order => {
-    const matchesRegion = !state.region || order.sheet === state.region;
+    const matchesRegion = !state.region || getSheet(order) === state.region;
     const orderTime = parseOrderDate(order.date);
     const searchText = [
       order.orderCode,
@@ -170,7 +173,7 @@ function renderOverview() {
   const regions = state.data.sheetNames
     .filter(sheetName => !state.region || sheetName === state.region)
     .map(sheetName => {
-      const regionOrders = orders.filter(order => order.sheet === sheetName);
+      const regionOrders = orders.filter(order => getSheet(order) === sheetName);
       const total = regionOrders.length;
       const reported = regionOrders.filter(order => order.imageCount > 0).length;
       const missing = regionOrders.filter(order => order.imageCount === 0).length;
@@ -211,7 +214,7 @@ function renderOrders() {
     <tr>
       <td><strong>${escapeHtml(order.orderCode)}</strong></td>
       <td>${escapeHtml(order.date)}</td>
-      <td>${escapeHtml(order.sheet)}</td>
+      <td>${escapeHtml(getSheet(order))}</td>
       <td>${escapeHtml(order.customer)}</td>
       <td>${escapeHtml(order.sales)}</td>
       <td>${escapeHtml(order.product)}</td>
@@ -234,7 +237,7 @@ function renderMissing() {
     <tr>
       <td><strong>${escapeHtml(order.orderCode)}</strong></td>
       <td>${escapeHtml(order.date)}</td>
-      <td>${escapeHtml(order.sheet)}</td>
+      <td>${escapeHtml(getSheet(order))}</td>
       <td>${escapeHtml(order.customer)}</td>
       <td>${escapeHtml(order.sales)}</td>
       <td>${escapeHtml(order.note)}</td>
@@ -268,7 +271,7 @@ function renderGallery() {
     ? orders.map(order => `
       <button class="order-item ${order.id === state.selectedOrderId ? "is-active" : ""}" data-select="${escapeHtml(order.id)}">
         <strong>${escapeHtml(order.orderCode)}</strong>
-        <span>${escapeHtml(order.customer || order.sheet)} · ${escapeHtml(getOperationalStatus(order))} · ${formatNumber(order.imageCount)} ảnh</span>
+        <span>${escapeHtml(order.customer || getSheet(order))} · ${escapeHtml(getOperationalStatus(order))} · ${formatNumber(order.imageCount)} ảnh</span>
       </button>
     `).join("")
     : `<div class="empty">Chưa có đơn nào có ảnh.</div>`;
@@ -282,7 +285,7 @@ function renderGallery() {
   }
 
   els.galleryTitle.textContent = `${selected.orderCode} · ${getOperationalStatus(selected)}`;
-  els.galleryMeta.textContent = [selected.customer, selected.sales, selected.sheet, selected.date].filter(Boolean).join(" · ");
+  els.galleryMeta.textContent = [selected.customer, selected.sales, getSheet(selected), selected.date].filter(Boolean).join(" · ");
   els.openFolderLink.href = `https://drive.google.com/drive/folders/${encodeURIComponent(selected.folderId)}`;
   els.openFolderLink.hidden = false;
 
@@ -412,3 +415,139 @@ els.closePreview.addEventListener("click", () => {
 
 loadData();
 setInterval(loadData, 10 * 60 * 1000);
+
+/* ─── UPLOAD MODAL ─── */
+let uploadOrder = null;
+let uploadFiles = [];
+
+function openUploadModal(orderId) {
+  uploadOrder = state.data && state.data.orders.find(o => o.id === orderId);
+  if (!uploadOrder) return;
+  uploadFiles = [];
+
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing;
+
+  document.getElementById("uploadModalTitle").textContent = `Upload ảnh — ${uploadOrder.orderCode}`;
+  document.getElementById("uploadModalMeta").textContent =
+    `${uploadOrder.customer} · ${getSheet(uploadOrder)} · ${existing}/${limit} ảnh`;
+  document.getElementById("uploadPreviewGrid").innerHTML = "";
+  document.getElementById("uploadSuccessBox").hidden = true;
+  document.getElementById("uploadSubmitBtn").hidden = true;
+  document.getElementById("uploadWarn").hidden = true;
+
+  const dz = document.getElementById("uploadDropzone");
+  if (remaining <= 0) {
+    dz.innerHTML = `<p style="color:#f59e0b">Phiếu đã đủ ${limit} ảnh, không thể upload thêm.</p>`;
+    dz.onclick = null;
+  } else {
+    dz.innerHTML = `
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>Kéo thả ảnh vào đây hoặc <strong>bấm để chọn</strong></p>
+      <small>Còn có thể thêm ${remaining} ảnh</small>
+      <input type="file" id="uploadFileInput" accept="image/*" multiple style="display:none">
+    `;
+    dz.onclick = () => document.getElementById("uploadFileInput").click();
+    dz.ondragover = e => { e.preventDefault(); dz.classList.add("dz-over"); };
+    dz.ondragleave = () => dz.classList.remove("dz-over");
+    dz.ondrop = e => { e.preventDefault(); dz.classList.remove("dz-over"); handleUploadFiles(e.dataTransfer.files); };
+    setTimeout(() => {
+      const fi = document.getElementById("uploadFileInput");
+      if (fi) fi.onchange = e => handleUploadFiles(e.target.files);
+    }, 50);
+  }
+
+  document.getElementById("uploadModal").showModal();
+}
+
+function handleUploadFiles(fileList) {
+  if (!uploadOrder) return;
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing - uploadFiles.length;
+  if (remaining <= 0) return;
+
+  const toAdd = Array.from(fileList).slice(0, remaining);
+  Promise.all(toAdd.map(f => new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res({ file: f, dataUrl: r.result });
+    r.readAsDataURL(f);
+  }))).then(results => {
+    uploadFiles = uploadFiles.concat(results);
+    renderUploadPreviews();
+  });
+}
+
+function renderUploadPreviews() {
+  const grid = document.getElementById("uploadPreviewGrid");
+  grid.innerHTML = uploadFiles.map((f, i) => `
+    <div class="up-prev-item">
+      <img src="${f.dataUrl}" alt="">
+      <button class="up-prev-remove" data-ri="${i}" title="Xoá">×</button>
+    </div>
+  `).join("");
+  document.getElementById("uploadSubmitBtn").hidden = uploadFiles.length === 0;
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing;
+  const warn = document.getElementById("uploadWarn");
+  warn.hidden = uploadFiles.length < remaining;
+  warn.textContent = `Còn có thể thêm tối đa ${remaining} ảnh.`;
+}
+
+async function doUploadSubmit() {
+  if (!uploadFiles.length || !uploadOrder) return;
+  const btn = document.getElementById("uploadSubmitBtn");
+  btn.disabled = true; btn.textContent = "Đang upload…";
+  try {
+    const files = uploadFiles.map(f => {
+      const comma = f.dataUrl.indexOf(",");
+      return { name: f.file.name, type: f.file.type, data: f.dataUrl.slice(comma + 1) };
+    });
+    const resp = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderCode: uploadOrder.orderCode,
+        folderId: uploadOrder.folderId,
+        sourceSheet: getSheet(uploadOrder),
+        rowNumber: uploadOrder.rowNumber,
+        files
+      })
+    });
+    const result = await resp.json();
+    if (result.error) { alert("Lỗi: " + result.error); return; }
+
+    // cập nhật local state
+    const idx = state.data.orders.findIndex(o => o.id === uploadOrder.id);
+    if (idx >= 0) {
+      state.data.orders[idx].imageCount = result.imageCount;
+      state.data.orders[idx].status = result.status;
+      if (result.files) state.data.orders[idx].images = (state.data.orders[idx].images || []).concat(result.files);
+    }
+
+    const box = document.getElementById("uploadSuccessBox");
+    box.textContent = `✓ Đã upload ${result.uploaded} ảnh — Tổng ${result.imageCount}/${uploadOrder.imageLimit || 10} — ${result.status}`;
+    box.hidden = false;
+    uploadFiles = [];
+    document.getElementById("uploadPreviewGrid").innerHTML = "";
+    document.getElementById("uploadSubmitBtn").hidden = true;
+    render();
+  } catch(e) { alert("Upload thất bại: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = "Upload ảnh"; }
+}
+
+document.addEventListener("click", e => {
+  const ri = e.target.dataset.ri;
+  if (ri !== undefined && e.target.classList.contains("up-prev-remove")) {
+    uploadFiles.splice(Number(ri), 1);
+    renderUploadPreviews();
+  }
+});
+
+// Gắn nút upload vào view-btn
+const origSelectOrder = selectOrder;
+window.selectOrder = function(orderId) {
+  openUploadModal(orderId);
+};

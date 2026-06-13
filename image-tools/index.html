@@ -197,6 +197,32 @@
 
     </div>
 
+    <dialog id="uploadModal" style="background:#0c1e2e;border:1px solid rgba(45,164,221,.22);border-radius:14px;padding:0;max-width:520px;width:100%;color:#e8f1f8">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(45,164,221,.14)">
+        <div>
+          <div id="uploadModalTitle" style="font:600 15px Inter,sans-serif"></div>
+          <div id="uploadModalMeta" style="font-size:12px;color:#89a8ba;margin-top:2px"></div>
+        </div>
+        <button onclick="document.getElementById('uploadModal').close()" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(45,164,221,.2);background:transparent;color:#89a8ba;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
+      </div>
+      <div style="padding:20px">
+        <div id="uploadDropzone" class="upload-dz" style="border:1.5px dashed rgba(45,164,221,.3);border-radius:11px;padding:28px 20px;text-align:center;cursor:pointer;color:#89a8ba;font-size:13px;margin-bottom:14px;transition:background .15s">
+        </div>
+        <div id="uploadWarn" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:9px 13px;font-size:12px;color:#f59e0b;margin-bottom:10px" hidden></div>
+        <div id="uploadPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:12px"></div>
+        <div id="uploadSuccessBox" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:11px 14px;font:500 13px Inter,sans-serif;color:#22c55e;margin-bottom:12px" hidden></div>
+        <button id="uploadSubmitBtn" onclick="doUploadSubmit()" hidden style="width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#054668,#0a5a82);color:#d6f2ff;font:600 14px Inter,sans-serif;cursor:pointer">Upload ảnh</button>
+      </div>
+    </dialog>
+    <style>
+      .up-prev-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#112336;border:1px solid rgba(45,164,221,.14)}
+      .up-prev-item img{width:100%;height:100%;object-fit:cover}
+      .up-prev-remove{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.75);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
+      .up-prev-remove:hover{background:#ef4444}
+      .upload-dz:hover,.upload-dz.dz-over{background:rgba(45,164,221,.08);border-color:#2da4dd}
+      #uploadModal::backdrop{background:rgba(0,0,0,.7)}
+    </style>
+
     <dialog id="previewDialog">
       <button class="close-btn" id="closePreview" aria-label="Đóng">×</button>
       <img id="previewImage" alt="" />
