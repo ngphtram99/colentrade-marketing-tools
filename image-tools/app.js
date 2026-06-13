@@ -43,6 +43,8 @@ const els = {
   galleryMeta: document.getElementById("galleryMeta"),
   imageGrid: document.getElementById("imageGrid"),
   openFolderLink: document.getElementById("openFolderLink"),
+  approveBtn: document.getElementById("approveBtn"),
+  rejectBtn: document.getElementById("rejectBtn"),
   previewDialog: document.getElementById("previewDialog"),
   previewImage: document.getElementById("previewImage"),
   closePreview: document.getElementById("closePreview")
@@ -281,6 +283,8 @@ function renderGallery() {
     els.galleryMeta.textContent = "";
     els.imageGrid.innerHTML = "";
     els.openFolderLink.hidden = true;
+    els.approveBtn.hidden = true;
+    els.rejectBtn.hidden = true;
     return;
   }
 
@@ -288,6 +292,13 @@ function renderGallery() {
   els.galleryMeta.textContent = [selected.customer, selected.sales, getSheet(selected), selected.date].filter(Boolean).join(" · ");
   els.openFolderLink.href = `https://drive.google.com/drive/folders/${encodeURIComponent(selected.folderId)}`;
   els.openFolderLink.hidden = false;
+
+  const opStatus = getOperationalStatus(selected);
+  const needReview = opStatus === "Chờ duyệt";
+  els.approveBtn.hidden = !needReview;
+  els.rejectBtn.hidden = !needReview;
+  els.approveBtn.onclick = () => doReviewAction(selected, "approved");
+  els.rejectBtn.onclick = () => doReviewAction(selected, "rejected");
 
   els.imageGrid.innerHTML = selected.images.map(image => `
     <article class="image-card">
@@ -415,6 +426,56 @@ els.closePreview.addEventListener("click", () => {
 
 loadData();
 setInterval(loadData, 10 * 60 * 1000);
+
+/* ─── REVIEW (Duyệt / Từ chối) ─── */
+
+async function doReviewAction(order, action) {
+  const phone = prompt("Nhập số điện thoại của bạn (nhân viên Marketing) để xác nhận:");
+  if (!phone) return;
+
+  let note = "";
+  if (action === "rejected") {
+    note = prompt("Lý do từ chối (không bắt buộc):") || "";
+  }
+
+  const btn = action === "approved" ? els.approveBtn : els.rejectBtn;
+  const otherBtn = action === "approved" ? els.rejectBtn : els.approveBtn;
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  otherBtn.disabled = true;
+  btn.textContent = "Đang xử lý...";
+
+  try {
+    const resp = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "review",
+        orderCode: order.orderCode,
+        reviewAction: action,
+        reviewNote: note,
+        reviewerPhone: phone
+      })
+    });
+    const result = await resp.json();
+    if (result.error) { alert("Lỗi: " + result.error); return; }
+
+    alert(`✓ Phiếu ${result.orderCode} đã ${result.status}${result.reviewer ? " bởi " + result.reviewer : ""}`);
+
+    const idx = state.data.orders.findIndex(o => o.id === order.id);
+    if (idx >= 0) {
+      state.data.orders[idx].status = result.status;
+      state.data.orders[idx].approved = action === "approved";
+    }
+    render();
+  } catch (e) {
+    alert("Thao tác thất bại: " + e.message);
+  } finally {
+    btn.disabled = false;
+    otherBtn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
 
 /* ─── UPLOAD MODAL ─── */
 let uploadOrder = null;
