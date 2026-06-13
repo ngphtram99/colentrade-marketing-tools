@@ -2,5 +2,10 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "outputDirectory": ".",
   "cleanUrls": true,
-  "trailingSlash": true
+  "trailingSlash": true,
+  "functions": {
+    "api/dashboard.js": { "maxDuration": 30 },
+    "api/upload.js":    { "maxDuration": 60 },
+    "api/image.js":     { "maxDuration": 15 }
+  }
 }
