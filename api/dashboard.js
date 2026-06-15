@@ -169,7 +169,7 @@ module.exports = async function handler(req, res) {
 
         const imageCount = files.length;
         const checkResult = indexes.checkResult >= 0 ? normalize(row[indexes.checkResult]) : "";
-        const approved = checkResult === "Đã duyệt" || (indexes.mktCheck >= 0 && truthy(row[indexes.mktCheck]));
+        const approved = checkResult === "Đã duyệt" || (indexes.mktCheck >= 0 && truthy(row[indexes.mktCheck])) || normalize(row[indexes.mktCheck] ?? "").toUpperCase() === "TRUE";
         const sysNoteRaw = indexes.sysNote >= 0 ? normalize(row[indexes.sysNote]) : "";
         const approvedBy = sysNoteRaw.split(" | ")[0] || "";
         const approvedAt = sysNoteRaw.split(" | ")[1] || "";
@@ -189,8 +189,6 @@ module.exports = async function handler(req, res) {
           folderId,
           imageCount,
           approved,
-          approvedBy,
-          approvedAt,
           approvedBy: indexes.approvedBy >= 0 ? normalize(row[indexes.approvedBy]) : "",
           approvedAt: indexes.approvedAt >= 0 ? normalize(row[indexes.approvedAt]) : "",
           status: error ? "Lỗi folder" : imageCount > 0 ? "Đã upload" : "Thiếu hình",
