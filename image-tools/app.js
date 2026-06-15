@@ -392,7 +392,16 @@ async function loadData() {
       throw new Error(data.error || "Không tải được dữ liệu.");
     }
 
+    // Map approved từ status field trả về từ Apps Script
+    if (data && data.orders) {
+      data.orders.forEach(o => {
+        if (o.approved === undefined) {
+          o.approved = o.status === "Đã duyệt" || o.status === true || o.status === "TRUE";
+        }
+      });
+    }
     state.data = data;
+    console.log("approved sample:", data.orders && data.orders.slice(0,3).map(o => ({id:o.id, approved:o.approved, sysNote:o.sysNote})));
     els.lastUpdated.textContent = `Cập nhật: ${formatVietnamDateTime(data.generatedAt)}`;
     render();
   } catch (err) {
@@ -513,6 +522,8 @@ async function doReviewAction(order, action) {
     if (idx >= 0) {
       state.data.orders[idx].status = result.status;
       state.data.orders[idx].approved = action === "approved";
+      state.data.orders[idx].approvedBy = result.reviewer || "";
+      state.data.orders[idx].approvedAt = result.updatedAt || "";
     }
     render();
   } catch (e) {
