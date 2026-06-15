@@ -1796,3 +1796,76 @@ html, body {
   #donePanel td:nth-child(3)::before { content: "Miền: "; }
   #donePanel td:nth-child(7)::before { content: "Duyệt bởi: "; }
 }
+
+/* Nút Đăng tải (Upload) trong bảng Tất cả phiếu */
+.upload-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 164, 221, 0.3);
+  background: linear-gradient(135deg, #2da4dd, #1a7ab0);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.upload-btn:hover { opacity: .88; transform: translateY(-1px); }
+.upload-btn.small { padding: 8px 11px; }
+
+/* Nút Đăng tải (Upload) trong bảng Tất cả phiếu */
+.upload-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 164, 221, 0.3);
+  background: linear-gradient(135deg, #2da4dd, #1a7ab0);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.upload-btn:hover { opacity: .88; transform: translateY(-1px); }
+.upload-btn.small { padding: 8px 11px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   FILTER PANEL — gọn lại trên mobile bằng accordion (toggle)
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .filters label:has(#regionFilter),
+  .filters label:has(#statusFilter),
+  .filters label:has(#dateFromInput),
+  .filters label:has(#dateToInput) {
+    display: none;
+  }
+
+  .filters.expanded label:has(#regionFilter),
+  .filters.expanded label:has(#statusFilter),
+  .filters.expanded label:has(#dateFromInput),
+  .filters.expanded label:has(#dateToInput) {
+    display: grid;
+  }
+
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid rgba(45, 164, 221, 0.24);
+    border-radius: 10px;
+    background: rgba(8, 25, 38, 0.72);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    order: 1;
+  }
+
+  .filters label:has(#searchInput) { order: 0; }
+  .filter-toggle { order: 2; }
+  .filters label:has(#regionFilter) { order: 3; }
+  .filters label:has(#statusFilter) { order: 4; }
+  .filters label:has(#dateFromInput) { order: 5; }
+  .filters label:has(#dateToInput)   { order: 6; }
+  .filters .primary-btn { order: 7; }
+  .last-updated { order: 8; }
+}

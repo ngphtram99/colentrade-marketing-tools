@@ -212,7 +212,22 @@ function renderOrders() {
     return;
   }
 
-  els.ordersBody.innerHTML = orders.map(order => `
+  els.ordersBody.innerHTML = orders.map(order => {
+    const st = getOperationalStatus(order);
+    const hasFolder = Boolean(order.folderId);
+    let actionBtn = "";
+    if (!hasFolder) {
+      actionBtn = `<span style="color:#89a8ba;font-size:12px">Chưa có folder</span>`;
+    } else if (order.imageCount === 0) {
+      actionBtn = `<button class="upload-btn" data-upload="${escapeHtml(order.id)}">⬆ Đăng tải</button>`;
+    } else if (order.imageCount < (order.imageLimit || 10)) {
+      actionBtn = `
+        <button class="view-btn" data-view="${escapeHtml(order.id)}">Xem (${order.imageCount})</button>
+        <button class="upload-btn small" data-upload="${escapeHtml(order.id)}">＋</button>`;
+    } else {
+      actionBtn = `<button class="view-btn" data-view="${escapeHtml(order.id)}">Xem (${order.imageCount})</button>`;
+    }
+    return `
     <tr>
       <td><strong>${escapeHtml(order.orderCode)}</strong></td>
       <td>${escapeHtml(order.date)}</td>
@@ -221,10 +236,10 @@ function renderOrders() {
       <td>${escapeHtml(order.sales)}</td>
       <td>${escapeHtml(order.product)}</td>
       <td>${formatNumber(order.imageCount)}</td>
-      <td><span class="status ${statusClass(getOperationalStatus(order))}">${escapeHtml(getOperationalStatus(order))}</span></td>
-      <td><button class="view-btn" data-view="${escapeHtml(order.id)}">Xem ảnh</button></td>
-    </tr>
-  `).join("");
+      <td><span class="status ${statusClass(st)}">${escapeHtml(st)}</span></td>
+      <td style="display:flex;gap:6px;align-items:center">${actionBtn}</td>
+    </tr>`;
+  }).join("");
 }
 
 function renderMissing() {
@@ -652,3 +667,13 @@ render = function() {
 };
 
 if (state.data) renderDone();
+
+// Toggle filter mở rộng trên mobile
+const filterToggleBtn = document.getElementById("filterToggle");
+if (filterToggleBtn) {
+  filterToggleBtn.addEventListener("click", () => {
+    const filters = document.querySelector(".filters");
+    const expanded = filters.classList.toggle("expanded");
+    filterToggleBtn.textContent = expanded ? "▴ Ẩn bộ lọc" : "▾ Bộ lọc khác";
+  });
+}
