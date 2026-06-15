@@ -187,6 +187,8 @@
                   <p id="galleryMeta"></p>
                 </div>
                 <a id="openFolderLink" class="ghost-link" href="#" target="_blank" rel="noreferrer" hidden>Mở Drive</a>
+                <button id="approveBtn" class="primary-btn" hidden>Duyệt</button>
+                <button id="rejectBtn" class="ghost-link" hidden>Từ chối</button>
               </div>
               <div class="image-grid" id="imageGrid"></div>
             </div>
@@ -221,6 +223,7 @@
       .up-prev-remove:hover{background:#ef4444}
       .upload-dz:hover,.upload-dz.dz-over{background:rgba(45,164,221,.08);border-color:#2da4dd}
       #uploadModal::backdrop{background:rgba(0,0,0,.7)}
+      #rejectBtn{color:#ef4444;border-color:rgba(239,68,68,.35)}
     </style>
 
     <dialog id="previewDialog">
@@ -277,6 +280,6 @@
         document.addEventListener("pointerleave", reset);
       })();
     </script>
-    <script src="app.js?v=11"></script>
+    <script src="app.js?v=12"></script>
   </body>
 </html>
