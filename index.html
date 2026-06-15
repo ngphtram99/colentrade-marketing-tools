@@ -79,7 +79,7 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
     </div>
 
     <nav class="menu" aria-label="Công cụ">
-      <button class="nav active" data-src="image-tools/" data-title="Cập nhật hình ảnh">
+      <button class="nav active" data-src="" data-title="Cập nhật hình ảnh">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="m21 15-5-5L5 19"/></svg>
         Cập nhật hình ảnh
       </button>
@@ -97,6 +97,9 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
 
 <script>
 const frame = document.getElementById('tool-frame');
+// Init: load src từ active button
+const activeBtn = document.querySelector('.nav.active');
+if (activeBtn) frame.src = activeBtn.dataset.src;
 document.querySelectorAll('.nav').forEach(button => {
   button.addEventListener('click', () => {
     document.querySelectorAll('.nav').forEach(item => item.classList.remove('active'));
