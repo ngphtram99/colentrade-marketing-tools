@@ -167,6 +167,7 @@ module.exports = async function handler(req, res) {
 
         const imageCount = files.length;
         const approved = indexes.mktCheck >= 0 ? truthy(row[indexes.mktCheck]) : false;
+        if (rowIndex === 2) console.log("[DEBUG] mktCheck index:", indexes.mktCheck, "headers:", JSON.stringify(headers), "raw value:", JSON.stringify(row[indexes.mktCheck]));
 
         orders.push({
           id: `${region}-${rowIndex}-${orderCode}`,
