@@ -219,7 +219,7 @@ function renderOrders() {
     if (!hasFolder) {
       actionBtn = `<span style="color:#89a8ba;font-size:12px">Chưa có folder</span>`;
     } else if (order.imageCount === 0) {
-      actionBtn = `<button class="upload-btn" data-upload="${escapeHtml(order.id)}">⬆ Đăng tải</button>`;
+      actionBtn = `<button class="upload-btn" data-upload="${escapeHtml(order.id)}">+ Đăng tải</button>`;
     } else if (order.imageCount < (order.imageLimit || 10)) {
       actionBtn = `
         <button class="view-btn" data-view="${escapeHtml(order.id)}">Xem (${order.imageCount})</button>
@@ -623,11 +623,7 @@ document.addEventListener("click", e => {
   }
 });
 
-// Gắn nút upload vào view-btn
-const origSelectOrder = selectOrder;
-window.selectOrder = function(orderId) {
-  openUploadModal(orderId);
-};
+
 
 // ════════════════════════════════════════════════════════════════════
 // PATCH: Tab "Hoàn thành" — các phiếu đã được MKT duyệt (approved=true)
