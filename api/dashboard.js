@@ -132,8 +132,8 @@ module.exports = async function handler(req, res) {
         product: col(headers, "Sản phẩm"),
         quantity: col(headers, "Số lượng"),
         mktCheck: col(headers, "MKT check"),
-        approvedBy: col(headers, "Người duyệt"),
-        approvedAt: col(headers, "Ngày hệ thống check"),
+        checkResult: col(headers, "Kết quả check ảnh"),
+        sysNote: col(headers, "Ghi chú hệ thống"),
         folderId: col(headers, "Folder ID")
       };
 
