@@ -423,7 +423,14 @@ document.addEventListener("click", event => {
   const selectButton = event.target.closest("[data-select]");
   const previewButton = event.target.closest("[data-preview]");
 
-  if (viewButton) selectOrder(viewButton.dataset.view);
+  if (viewButton) {
+    const orderId = viewButton.dataset.view;
+    // Switch sang tab gallery nếu chưa ở đó
+    if (state.activeTab !== "gallery") {
+      switchTab("gallery");
+    }
+    selectOrder(orderId);
+  }
   if (selectButton) {
     state.selectedOrderId = selectButton.dataset.select;
     renderGallery();
