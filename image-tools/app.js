@@ -613,3 +613,42 @@ const origSelectOrder = selectOrder;
 window.selectOrder = function(orderId) {
   openUploadModal(orderId);
 };
+
+// ════════════════════════════════════════════════════════════════════
+// PATCH: Tab "Hoàn thành" — các phiếu đã được MKT duyệt (approved=true)
+// ════════════════════════════════════════════════════════════════════
+tabTitles.done = ["Hoàn thành", "Các phiếu đã được MKT xác nhận duyệt"];
+
+els.panels.done = document.getElementById("donePanel");
+els.doneBody = document.getElementById("doneBody");
+
+function renderDone() {
+  const done = filteredOrders().filter(o => o.approved);
+
+  if (!done.length) {
+    els.doneBody.innerHTML = `<tr><td colspan="9"><div class="empty">Chưa có phiếu nào được duyệt.</div></td></tr>`;
+    return;
+  }
+
+  els.doneBody.innerHTML = done.map(o => `
+    <tr>
+      <td><strong>${esc(o.orderCode)}</strong></td>
+      <td>${esc(o.date)}</td>
+      <td>${esc(getSheet(o))}</td>
+      <td>${esc(o.customer)}</td>
+      <td>${esc(o.sales)}</td>
+      <td>${fmt(o.imageCount)}</td>
+      <td>${esc(o.approvedBy || "")}</td>
+      <td>${esc(o.approvedAt || "")}</td>
+      <td><button class="view-btn" data-view="${esc(o.id)}">Xem (${o.imageCount})</button></td>
+    </tr>
+  `).join("");
+}
+
+const _origRender = render;
+render = function() {
+  _origRender();
+  renderDone();
+};
+
+if (state.data) renderDone();

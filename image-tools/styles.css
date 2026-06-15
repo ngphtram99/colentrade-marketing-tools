@@ -1751,3 +1751,48 @@ html, body {
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Tab "Hoàn thành" trên mobile — card layout giống Tất cả phiếu */
+@media (max-width: 640px) {
+  #donePanel .table-wrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+  #donePanel table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  #donePanel thead { display: none; }
+  #donePanel tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "code   action"
+      "date   date"
+      "region region"
+      "customer customer"
+      "approver approver";
+    gap: 6px 10px;
+    padding: 14px;
+    border: 1px solid rgba(45, 164, 221, 0.18);
+    border-radius: 12px;
+    background: rgba(8, 25, 38, 0.82);
+    box-shadow: var(--shadow-soft);
+  }
+  #donePanel td { display: block; border: 0; padding: 0; white-space: normal; word-break: break-word; font-size: 13px; }
+  #donePanel td:nth-child(5),
+  #donePanel td:nth-child(6) { display: none; }
+  #donePanel td:nth-child(1) { grid-area: code; font-size: 15px; font-weight: 700; }
+  #donePanel td:nth-child(2) { grid-area: date; color: var(--muted); font-size: 12.5px; }
+  #donePanel td:nth-child(3) { grid-area: region; color: var(--muted); font-size: 12.5px; }
+  #donePanel td:nth-child(4) { grid-area: customer; font-weight: 600; }
+  #donePanel td:nth-child(7) { grid-area: approver; color: var(--muted); font-size: 12px; }
+  #donePanel td:nth-child(8) { display: none; }
+  #donePanel td:nth-child(9) { grid-area: action; justify-self: end; }
+  #donePanel td:nth-child(2)::before { content: "Ngày: "; }
+  #donePanel td:nth-child(3)::before { content: "Miền: "; }
+  #donePanel td:nth-child(7)::before { content: "Duyệt bởi: "; }
+}

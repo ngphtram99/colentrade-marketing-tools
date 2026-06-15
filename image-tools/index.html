@@ -42,8 +42,8 @@
         <nav class="tabs" aria-label="Dashboard tabs">
           <button class="tab is-active" data-tab="overview">Tổng quan</button>
           <button class="tab" data-tab="orders">Tất cả phiếu</button>
-          <button class="tab" data-tab="missing">Cần xử lý</button>
           <button class="tab" data-tab="gallery">Duyệt hình</button>
+          <button class="tab" data-tab="done">Hoàn thành</button>
         </nav>
         </section>
 
@@ -192,6 +192,48 @@
               </div>
               <div class="image-grid" id="imageGrid"></div>
             </div>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="donePanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Số ảnh</th>
+                  <th>Người duyệt</th>
+                  <th>Ngày duyệt</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="doneBody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="panel tab-panel" id="donePanel">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Mã đơn</th>
+                  <th>Ngày tạo</th>
+                  <th>Miền</th>
+                  <th>Khách hàng</th>
+                  <th>Nhân viên</th>
+                  <th>Số ảnh</th>
+                  <th>Người duyệt</th>
+                  <th>Ngày duyệt</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="doneBody"></tbody>
+            </table>
           </div>
         </section>
         <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
