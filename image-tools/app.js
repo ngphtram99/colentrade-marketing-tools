@@ -673,3 +673,9 @@ if (filterToggleBtn) {
     filterToggleBtn.textContent = expanded ? "▴ Ẩn bộ lọc" : "▾ Bộ lọc khác";
   });
 }
+
+// Click handler cho nút upload (+ Đăng tải)
+document.addEventListener("click", e => {
+  const uploadBtn = e.target.closest("[data-upload]");
+  if (uploadBtn) openUploadModal(uploadBtn.dataset.upload);
+});
