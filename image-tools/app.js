@@ -623,7 +623,7 @@ els.panels.done = document.getElementById("donePanel");
 els.doneBody = document.getElementById("doneBody");
 
 function renderDone() {
-  const done = filteredOrders().filter(o => o.approved);
+  const done = getFilteredOrders().filter(o => o.approved);
 
   if (!done.length) {
     els.doneBody.innerHTML = `<tr><td colspan="9"><div class="empty">Chưa có phiếu nào được duyệt.</div></td></tr>`;
