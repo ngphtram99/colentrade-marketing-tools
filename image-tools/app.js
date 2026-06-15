@@ -392,12 +392,11 @@ async function loadData() {
       throw new Error(data.error || "Không tải được dữ liệu.");
     }
 
-    // Map approved từ status field trả về từ Apps Script
+    // approved đã được map đúng từ dashboard.js (cột MKT check)
+    // approvedBy/approvedAt cần extract từ field riêng nếu có
     if (data && data.orders) {
       data.orders.forEach(o => {
-        if (o.approved === undefined) {
-          o.approved = o.status === "Đã duyệt" || o.status === true || o.status === "TRUE";
-        }
+        if (o.approved === undefined) o.approved = false;
       });
     }
     state.data = data;
