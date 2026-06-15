@@ -266,6 +266,11 @@ function selectOrder(orderId) {
   const order = state.data && state.data.orders.find(item => item.id === orderId);
   state.selectedOrderId = orderId;
 
+  if (state.activeTab === "done") {
+    renderDoneImages(order);
+    return;
+  }
+
   if (order && order.imageCount > 0) {
     setTab("gallery");
     renderGallery();
@@ -274,6 +279,22 @@ function selectOrder(orderId) {
 
   setTab("missing");
   renderMissing();
+}
+
+function renderDoneImages(order) {
+  const grid = document.getElementById("doneImageGrid");
+  if (!grid || !order) return;
+  grid.innerHTML = order.images && order.images.length
+    ? order.images.map(image => `
+      <article class="image-card">
+        <button data-preview="${escapeHtml(image.imageUrl)}" aria-label="Xem lớn ${escapeHtml(image.name)}">
+          <img src="${escapeHtml(image.thumbnailUrl)}" alt="${escapeHtml(image.name)}" loading="lazy" />
+        </button>
+        <p>${escapeHtml(image.name)}</p>
+      </article>
+    `).join("")
+    : `<div class="empty">Không có ảnh.</div>`;
+  grid.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function renderGallery() {
@@ -425,11 +446,13 @@ document.addEventListener("click", event => {
 
   if (viewButton) {
     const orderId = viewButton.dataset.view;
-    // Switch sang tab gallery nếu chưa ở đó
-    if (state.activeTab !== "gallery") {
-      switchTab("gallery");
+    if (state.activeTab === "gallery") {
+      selectOrder(orderId);
+    } else {
+      // Hiện hình inline ở tab hiện tại (Hoàn thành)
+      const order = state.data && state.data.orders.find(o => o.id === orderId);
+      if (order) selectOrder(orderId, true);
     }
-    selectOrder(orderId);
   }
   if (selectButton) {
     state.selectedOrderId = selectButton.dataset.select;
