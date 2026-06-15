@@ -573,7 +573,8 @@ async function doUploadSubmit() {
         orderCode: uploadOrder.orderCode,
         folderId: uploadOrder.folderId,
         sourceSheet: getSheet(uploadOrder),
-        rowNumber: uploadOrder.rowNumber,
+        customer: uploadOrder.customer, 
+	rowNumber: uploadOrder.rowNumber,
         files
       })
     });
