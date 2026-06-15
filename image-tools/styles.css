@@ -1354,3 +1354,100 @@ th {
     justify-self: start;
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE COMPACT VIEW — Tất cả phiếu
+   Chỉ hiện: Mã đơn, Ngày tạo, Miền, Khách hàng, Trạng thái, Xem ảnh
+   Bảng table → card-stack trên màn hình nhỏ
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Áp dụng riêng cho bảng "Tất cả phiếu" (#ordersBody) */
+  #ordersPanel .table-wrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  #ordersPanel table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  /* Ẩn header gốc, dùng data-label làm tiêu đề trong card */
+  #ordersPanel thead {
+    display: none;
+  }
+
+  #ordersPanel tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "code   action"
+      "date   date"
+      "region region"
+      "customer customer"
+      "status status";
+    gap: 6px 10px;
+    padding: 14px;
+    border: 1px solid rgba(45, 164, 221, 0.18);
+    border-radius: 12px;
+    background: rgba(8, 25, 38, 0.82);
+    box-shadow: var(--shadow-soft);
+  }
+
+  #ordersPanel tbody tr:hover {
+    background: rgba(8, 25, 38, 0.82);
+  }
+
+  #ordersPanel td {
+    display: block;
+    border: 0;
+    padding: 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Ẩn các cột không cần trên mobile: Nhân viên, Sản phẩm, Số ảnh */
+  #ordersPanel td:nth-child(5),  /* Nhân viên */
+  #ordersPanel td:nth-child(6),  /* Sản phẩm */
+  #ordersPanel td:nth-child(7) { /* Số ảnh */
+    display: none;
+  }
+
+  /* Gán vùng grid cho từng cột còn lại */
+  #ordersPanel td:nth-child(1) { grid-area: code;     font-size: 15px; }
+  #ordersPanel td:nth-child(2) { grid-area: date;     color: var(--muted); font-size: 13px; }
+  #ordersPanel td:nth-child(3) { grid-area: region;   color: var(--muted); font-size: 13px; }
+  #ordersPanel td:nth-child(4) { grid-area: customer; font-size: 14px; font-weight: 600; }
+  #ordersPanel td:nth-child(8) { grid-area: status; }
+  #ordersPanel td:nth-child(9) { grid-area: action;   justify-self: end; }
+
+  /* Thêm label nhỏ trước Ngày tạo / Miền để dễ đọc */
+  #ordersPanel td:nth-child(2)::before {
+    content: "Ngày tạo: ";
+    color: #5d7d91;
+  }
+  #ordersPanel td:nth-child(3)::before {
+    content: "Miền: ";
+    color: #5d7d91;
+  }
+
+  /* Nút action nhỏ gọn hơn trên mobile */
+  #ordersPanel .view-btn,
+  #ordersPanel .upload-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  #ordersPanel .upload-btn.small {
+    padding: 7px 9px;
+  }
+
+  /* Action cell: nếu có 2 nút (Xem + thêm) thì xếp dọc cho gọn */
+  #ordersPanel td:nth-child(9) > * {
+    display: inline-flex;
+  }
+}
