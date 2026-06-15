@@ -177,7 +177,7 @@ module.exports = async function handler(req, res) {
 
         const imageCount  = files.length;
         const rawStatus   = getCell(row,idx.imageStatus);
-        const isApproved  = rawStatus==="Đã duyệt";
+        const isApproved  = rawStatus==="Đã duyệt" || rawStatus.toUpperCase()==="TRUE";
         const status      = resolveStatus(imageCount, Boolean(error), isApproved);
         const area        = getCell(row,idx.area)||sheetName;
 
