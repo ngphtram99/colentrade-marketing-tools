@@ -11,7 +11,7 @@ const FIELD_ALIASES = {
   product:     ["Sản phẩm","Mã hàng","Tên hàng"],
   quantity:    ["Số lượng","SL"],
   note:        ["Ghi chú chung","Ghi chú","Nội dung","Note"],
-  imageStatus: ["Trạng thái hình ảnh","MKT check","Trạng thái"],
+  imageStatus: ["Kết quả check ảnh","Trạng thái hình ảnh","MKT check"],
   folderId:    ["Link thư mục Drive","Folder ID","Folder","Drive Folder","Link Drive"],
   lastUpdated: ["Ngày cập nhật cuối","Cập nhật cuối","Thời gian upload","Ngày cập nhật"],
   imageCount:  ["Số lượng ảnh","Số ảnh","Image Count","Ảnh"],
