@@ -643,15 +643,15 @@ function renderDone() {
 
   els.doneBody.innerHTML = done.map(o => `
     <tr>
-      <td><strong>${esc(o.orderCode)}</strong></td>
-      <td>${esc(o.date)}</td>
-      <td>${esc(getSheet(o))}</td>
-      <td>${esc(o.customer)}</td>
-      <td>${esc(o.sales)}</td>
+      <td><strong>${escapeHtml(o.orderCode)}</strong></td>
+      <td>${escapeHtml(o.date)}</td>
+      <td>${escapeHtml(getSheet(o))}</td>
+      <td>${escapeHtml(o.customer)}</td>
+      <td>${escapeHtml(o.sales)}</td>
       <td>${fmt(o.imageCount)}</td>
-      <td>${esc(o.approvedBy || "")}</td>
-      <td>${esc(o.approvedAt || "")}</td>
-      <td><button class="view-btn" data-view="${esc(o.id)}">Xem (${o.imageCount})</button></td>
+      <td>${escapeHtml(o.approvedBy || "")}</td>
+      <td>${escapeHtml(o.approvedAt || "")}</td>
+      <td><button class="view-btn" data-view="${escapeHtml(o.id)}">Xem (${o.imageCount})</button></td>
     </tr>
   `).join("");
 }
