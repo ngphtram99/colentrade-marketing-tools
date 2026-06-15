@@ -132,6 +132,8 @@ module.exports = async function handler(req, res) {
         product: col(headers, "Sản phẩm"),
         quantity: col(headers, "Số lượng"),
         mktCheck: col(headers, "MKT check"),
+        approvedBy: col(headers, "Người duyệt"),
+        approvedAt: col(headers, "Ngày hệ thống check"),
         folderId: col(headers, "Folder ID")
       };
 
@@ -166,7 +168,11 @@ module.exports = async function handler(req, res) {
         }
 
         const imageCount = files.length;
-        const approved = indexes.mktCheck >= 0 ? truthy(row[indexes.mktCheck]) : false;
+        const checkResult = indexes.checkResult >= 0 ? normalize(row[indexes.checkResult]) : "";
+        const approved = checkResult === "Đã duyệt" || (indexes.mktCheck >= 0 && truthy(row[indexes.mktCheck]));
+        const sysNoteRaw = indexes.sysNote >= 0 ? normalize(row[indexes.sysNote]) : "";
+        const approvedBy = sysNoteRaw.split(" | ")[0] || "";
+        const approvedAt = sysNoteRaw.split(" | ")[1] || "";
         if (rowIndex === 2) console.log("[DEBUG] mktCheck index:", indexes.mktCheck, "headers:", JSON.stringify(headers), "raw value:", JSON.stringify(row[indexes.mktCheck]));
 
         orders.push({
@@ -183,6 +189,10 @@ module.exports = async function handler(req, res) {
           folderId,
           imageCount,
           approved,
+          approvedBy,
+          approvedAt,
+          approvedBy: indexes.approvedBy >= 0 ? normalize(row[indexes.approvedBy]) : "",
+          approvedAt: indexes.approvedAt >= 0 ? normalize(row[indexes.approvedAt]) : "",
           status: error ? "Lỗi folder" : imageCount > 0 ? "Đã upload" : "Thiếu hình",
           note: error || (imageCount > 0 ? "" : `Không thấy file có chứa mã đơn: ${orderCode}`),
           images: files.map(file => ({
