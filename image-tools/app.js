@@ -277,7 +277,7 @@ function selectOrder(orderId) {
 }
 
 function renderGallery() {
-  const orders = getFilteredOrders().filter(order => order.imageCount > 0);
+  const orders = getFilteredOrders().filter(order => order.imageCount > 0 && !order.approved);
   const selected = orders.find(order => order.id === state.selectedOrderId) || orders[0];
 
   if (selected && !state.selectedOrderId) {
@@ -445,7 +445,9 @@ setInterval(loadData, 10 * 60 * 1000);
 /* ─── REVIEW (Duyệt / Từ chối) ─── */
 
 async function doReviewAction(order, action) {
-  const phone = prompt("Nhập số điện thoại của bạn (nhân viên Marketing) để xác nhận:");
+  const savedPhone = localStorage.getItem("mkt_reviewer_phone") || "";
+  const phone = prompt("Nhập số điện thoại của bạn (nhân viên Marketing) để xác nhận:", savedPhone);
+  if (phone) localStorage.setItem("mkt_reviewer_phone", phone.trim());
   if (!phone) return;
 
   let note = "";
