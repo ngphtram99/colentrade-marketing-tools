@@ -648,7 +648,7 @@ function renderDone() {
       <td>${escapeHtml(getSheet(o))}</td>
       <td>${escapeHtml(o.customer)}</td>
       <td>${escapeHtml(o.sales)}</td>
-      <td>${fmt(o.imageCount)}</td>
+      <td>${formatNumber(o.imageCount)}</td>
       <td>${escapeHtml(o.approvedBy || "")}</td>
       <td>${escapeHtml(o.approvedAt || "")}</td>
       <td><button class="view-btn" data-view="${escapeHtml(o.id)}">Xem (${o.imageCount})</button></td>
