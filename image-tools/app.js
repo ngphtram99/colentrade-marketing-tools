@@ -708,6 +708,9 @@ if (state.data) renderDone();
 
 // Toggle filter mở rộng trên mobile
 const filterToggleBtn = document.getElementById("filterToggle");
+if (filterToggleBtn && window.innerWidth > 760) {
+  filterToggleBtn.style.setProperty("display", "none", "important");
+}
 if (filterToggleBtn) {
   filterToggleBtn.addEventListener("click", () => {
     const filters = document.querySelector(".filters");
