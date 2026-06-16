@@ -352,6 +352,24 @@ body::before{
   .hist-money{text-align:left}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* Region grid cards */
+.rg-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;padding:4px 0}
+.rg-card{background:var(--s1);border:1px solid var(--bd1);border-radius:var(--r);overflow:hidden}
+.rg-card-main{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;cursor:pointer;gap:12px;transition:background .15s}
+.rg-card-main:hover{background:var(--s2)}
+.rg-card-left{min-width:0;flex:1}
+.rg-card-name{font:700 14px Inter,sans-serif;color:var(--t1);margin-bottom:3px}
+.rg-card-meta{font-size:12px;color:var(--t2)}
+.rg-card-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.rg-card-pct{font:700 16px Inter,sans-serif;min-width:38px;text-align:right}
+.rg-card-chevron{color:var(--t3);font-size:13px;transition:transform .15s}
+.rg-card-detail{padding:0 16px 14px;border-top:1px solid var(--bd1)}
+.rg-detail-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--bd1)}
+.rg-detail-row:last-child{border-bottom:none}
+.rg-detail-label{font-size:12px;color:var(--t3)}
+.rg-detail-val{font:600 13px Inter,sans-serif;color:var(--t1)}
+.rg-kh-list{margin-top:10px;display:flex;flex-direction:column;gap:4px}
 </style>
 </head>
 <body>
@@ -1261,80 +1279,102 @@ function clearSearch() {
 function renderRegions() {
   const ra = document.getElementById('region-area');
   if (!KH.length) return;
-  if (SUMMARY.length) {
-    ra.innerHTML = SUMMARY.map(row => {
-      const bc = barColor(row.pct);
-      return `<div class="rg">
-        <div class="rg-head">
-          <div class="rg-name">${row.region}</div>
-          <div class="rg-sum">${fmt(row.xuat)}/${fmt(row.tong)} · ${row.tt}</div>
-        </div>
-        <div class="rg-table">
-          <div class="rg-row sum-row">
+
+  function buildCards(items, isSummary) {
+    return items.map((row, idx) => {
+      const tong = isSummary ? row.tong : row.tong;
+      const xuat = isSummary ? row.xuat : row.xuat;
+      const con  = isSummary ? row.con  : row.tonCuoi;
+      const vuot = isSummary ? row.vuot : row.vuot;
+      const pct  = isSummary ? row.pct  : (tong > 0 ? Math.round(xuat/tong*100) : 0);
+      const bc   = barColor(pct);
+      const name = isSummary ? row.region : row.region;
+
+      // For non-summary, get KH list
+      let khList = '';
+      if (!isSummary) {
+        const visible = getVisibleKH();
+        const list = visible.filter(d => d.region === name);
+        khList = list.map(d => {
+          const p = d.tong > 0 ? Math.round(d.xuat/d.tong*100) : 0;
+          const bc2 = barColor(p);
+          const b = getBadge(d);
+          const showBadge = isOverLimitStatus(d.tt) || d.xuat === 0;
+          return `<div class="rg-row" onclick="goToKH(${KH.indexOf(d)})">
             <div class="row-info">
-              <div class="row-name dim">Tổng khu vực</div>
-              <div class="row-nums">định mức ${fmt(row.tong)} · đã xuất ${fmt(row.xuat)} · còn ${fmt(row.con)}${row.vuot ? ` · vượt ${fmt(row.vuot)}` : ''}</div>
+              <div class="row-name">
+                ${d.kh}
+                ${showBadge ? `<span class="badge ${b.cls}" style="font-size:9px;padding:1px 5px">${b.label}</span>` : ''}
+              </div>
+              <div class="row-nums">${fmt(d.tong)} · xuất ${fmt(d.xuat)} · còn ${fmt(d.tonCuoi)}${d.vuot ? ` · vượt ${fmt(d.vuot)}` : ''}</div>
             </div>
             <div class="row-right">
-              <div class="mini-track"><div class="mini-bar" style="width:${Math.min(row.pct,100)}%;background:${bc}"></div></div>
-              <div class="mini-pct" style="color:${bc}">${row.pct}%</div>
+              <div class="mini-track"><div class="mini-bar" style="width:${Math.min(p,100)}%;background:${bc2}"></div></div>
+              <div class="mini-pct" style="color:${bc2}">${p}%</div>
             </div>
+          </div>`;
+        }).join('');
+      }
+
+      const cardId = 'rgcard_' + idx;
+      return `<div class="rg-card">
+        <div class="rg-card-main" onclick="toggleRgCard('${cardId}')">
+          <div class="rg-card-left">
+            <div class="rg-card-name">${name}</div>
+            <div class="rg-card-meta">Còn lại: <strong>${fmt(con)}</strong>${vuot ? ` · Vượt: <strong style="color:var(--red)">${fmt(vuot)}</strong>` : ''}</div>
           </div>
+          <div class="rg-card-right">
+            <div class="rg-card-pct" style="color:${bc}">${pct}%</div>
+            <div class="mini-track" style="width:80px"><div class="mini-bar" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
+            <div class="rg-card-chevron" id="${cardId}_chev">▾</div>
+          </div>
+        </div>
+        <div class="rg-card-detail" id="${cardId}" style="display:none">
+          <div class="rg-detail-row">
+            <span class="rg-detail-label">Tổng định mức</span>
+            <span class="rg-detail-val">${fmt(tong)}</span>
+          </div>
+          <div class="rg-detail-row">
+            <span class="rg-detail-label">Đã xuất</span>
+            <span class="rg-detail-val">${fmt(xuat)}</span>
+          </div>
+          <div class="rg-detail-row">
+            <span class="rg-detail-label">Còn lại</span>
+            <span class="rg-detail-val">${fmt(con)}</span>
+          </div>
+          ${vuot ? `<div class="rg-detail-row"><span class="rg-detail-label">Vượt</span><span class="rg-detail-val" style="color:var(--red)">${fmt(vuot)}</span></div>` : ''}
+          ${khList ? `<div class="rg-kh-list">${khList}</div>` : ''}
         </div>
       </div>`;
     }).join('');
+  }
+
+  if (SUMMARY.length) {
+    ra.innerHTML = `<div class="rg-grid">${buildCards(SUMMARY, true)}</div>`;
     return;
   }
+
   const visible = getVisibleKH();
   const regions = [...new Set(visible.map(d => d.region))].filter(Boolean);
-  let html = '';
-  regions.forEach(region => {
-    const list  = visible.filter(d => d.region === region);
-    const tD    = list.reduce((s,d) => s+d.tong, 0);
-    const tX    = list.reduce((s,d) => s+d.xuat, 0);
-    const tC    = list.reduce((s,d) => s+d.tonCuoi, 0);
-    const tV    = list.reduce((s,d) => s+d.vuot, 0);
-    const pct   = tD > 0 ? Math.round(tX/tD*100) : 0;
-    const bc    = barColor(pct);
-    const done  = list.filter(d => d.xuat > 0).length;
-    html += `<div class="rg">
-      <div class="rg-head">
-        <div class="rg-name">${region}</div>
-        <div class="rg-sum">${done}/${list.length} · ${fmt(tX)}/${fmt(tD)}</div>
-      </div>
-      <div class="rg-table">
-        <div class="rg-row sum-row">
-          <div class="row-info">
-            <div class="row-name dim">Tổng khu vực</div>
-            <div class="row-nums">dùng ${fmt(tD)} · xuất ${fmt(tX)} · tồn ${fmt(tC)} · vượt ${fmt(tV)}</div>
-          </div>
-          <div class="row-right">
-            <div class="mini-track"><div class="mini-bar" style="width:${Math.min(pct,100)}%;background:${bc}"></div></div>
-            <div class="mini-pct" style="color:${bc}">${pct}%</div>
-          </div>
-        </div>`;
-    list.forEach(d => {
-      const p  = d.tong > 0 ? Math.round(d.xuat/d.tong*100) : 0;
-      const bc2 = barColor(p);
-      const b = getBadge(d);
-      const showBadge = isOverLimitStatus(d.tt) || d.xuat === 0;
-      html += `<div class="rg-row" onclick="goToKH(${KH.indexOf(d)})">
-        <div class="row-info">
-          <div class="row-name">
-            ${d.kh}
-            ${showBadge ? `<span class="badge ${b.cls}" style="font-size:9px;padding:1px 5px">${b.label}</span>` : ''}
-          </div>
-          <div class="row-nums">dùng ${fmt(d.tong)} → xuất ${fmt(d.xuat)} · tồn ${fmt(d.tonCuoi)}${d.vuot ? ` · vượt ${fmt(d.vuot)}` : ''}</div>
-        </div>
-        <div class="row-right">
-          <div class="mini-track"><div class="mini-bar" style="width:${Math.min(p,100)}%;background:${bc2}"></div></div>
-          <div class="mini-pct" style="color:${bc2}">${p}%</div>
-        </div>
-      </div>`;
-    });
-    html += `</div></div>`;
+  const items = regions.map(region => {
+    const list = visible.filter(d => d.region === region);
+    const tong = list.reduce((s,d) => s+d.tong, 0);
+    const xuat = list.reduce((s,d) => s+d.xuat, 0);
+    const con  = list.reduce((s,d) => s+d.tonCuoi, 0);
+    const vuot = list.reduce((s,d) => s+d.vuot, 0);
+    const pct  = tong > 0 ? Math.round(xuat/tong*100) : 0;
+    return { region, tong, xuat, con, vuot, pct };
   });
-  ra.innerHTML = html;
+  ra.innerHTML = `<div class="rg-grid">${buildCards(items, false)}</div>`;
+}
+
+function toggleRgCard(id) {
+  const el = document.getElementById(id);
+  const chev = document.getElementById(id + '_chev');
+  if (!el) return;
+  const open = el.style.display !== 'none';
+  el.style.display = open ? 'none' : '';
+  if (chev) chev.textContent = open ? '▾' : '▴';
 }
 
 function goToKH(idx) {
