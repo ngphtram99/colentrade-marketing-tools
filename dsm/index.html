@@ -399,6 +399,10 @@ body::before{
       <label for="auth-phone">Số điện thoại</label>
       <input class="auth-input" id="auth-phone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="0901234567">
     </div>
+    <div class="auth-field" style="margin-top:12px">
+      <label for="auth-code">Mã truy cập (4 số)</label>
+      <input class="auth-input" id="auth-code" type="text" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="0000">
+    </div>
     <div class="auth-actions">
       <button class="auth-btn" id="auth-submit" type="button" onclick="submitAuth()">Truy cập</button>
       <span class="auth-note">Cập nhật nhân sự trực tiếp trong Google Sheet.</span>
@@ -861,17 +865,17 @@ function formatAuthError(auth) {
   return base + reason;
 }
 
-function setAuthorized(auth) {
+function setAuthorized(auth, code) {
   authUser = auth.user || {};
   authPhone = cleanPhone(authUser.phone || authPhone);
-  saveAuthSession(authPhone);
+  saveAuthSession(authPhone, code);
   document.getElementById('auth-panel').hidden = true;
   document.getElementById('secure-app').hidden = false;
   document.getElementById('user-name').textContent = authUser.name || authPhone;
   loadData();
 }
 
-function requestAuth(phone, isLogin) {
+function requestAuth(phone, code, isLogin) {
   const currentRequest = ++requestId;
   setAuthLoading(true);
   document.getElementById('auth-error').style.display = 'none';
@@ -904,6 +908,7 @@ function requestAuth(phone, isLogin) {
     callback: callbackName,
     authOnly: '1',
     authPhone: cleanPhone(phone),
+    authCode: String(code || ''),
     _: String(Date.now())
   });
   if (isLogin) params.set('authEvent', 'login');
@@ -913,13 +918,20 @@ function requestAuth(phone, isLogin) {
 
 function submitAuth() {
   const input = document.getElementById('auth-phone');
+  const codeInput = document.getElementById('auth-code');
   const phone = cleanPhone(input.value);
+  const code = String(codeInput.value || '').trim();
   if (!phone) {
     showAuthError('Vui lòng nhập số điện thoại.');
     input.focus();
     return;
   }
-  requestAuth(phone, true);
+  if (!code || code.length !== 4) {
+    showAuthError('Vui lòng nhập mã truy cập 4 số.');
+    codeInput.focus();
+    return;
+  }
+  requestAuth(phone, code, true);
 }
 
 function logoutAuth() {
