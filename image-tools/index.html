@@ -6,7 +6,7 @@
     <title>MKT Report Control</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=12" />
+    <link rel="stylesheet" href="styles.css?v=15" />
   </head>
   <body>
     <div class="terrazzo-bg" aria-hidden="true">
@@ -42,8 +42,8 @@
         <nav class="tabs" aria-label="Dashboard tabs">
           <button class="tab is-active" data-tab="overview">Tổng quan</button>
           <button class="tab" data-tab="orders">Tất cả phiếu</button>
+          <button class="tab" data-tab="missing">Cần xử lý</button>
           <button class="tab" data-tab="gallery">Duyệt hình</button>
-          <button class="tab" data-tab="done">Hoàn thành</button>
         </nav>
         </section>
 
@@ -63,9 +63,10 @@
               <span>Trạng thái</span>
               <select id="statusFilter">
                 <option value="">Tất cả</option>
-                <option value="missing">Thiếu hình</option>
-                <option value="uploaded">Đã upload</option>
-                <option value="pending">Chờ duyệt</option>
+                <option value="missing">Chưa cập nhật</option>
+                <option value="valid">Hợp lệ</option>
+                <option value="full">Đã đủ ảnh</option>
+                <option value="over">Vượt giới hạn</option>
                 <option value="error">Lỗi folder</option>
               </select>
             </label>
@@ -81,7 +82,6 @@
               <span>Tìm kiếm</span>
               <input id="searchInput" type="search" placeholder="Mã đơn, khách hàng, nhân viên" />
             </label>
-            <button id="filterToggle" class="filter-toggle" type="button">▾ Bộ lọc khác</button>
             <button id="refreshBtn" class="primary-btn">Tải lại dữ liệu</button>
             <p id="lastUpdated" class="last-updated">Chưa tải dữ liệu</p>
           </div>
@@ -104,11 +104,11 @@
               <strong id="notReportedMetric">0</strong>
             </article>
             <article class="metric danger">
-              <span>Thiếu hình</span>
+              <span>Chưa cập nhật</span>
               <strong id="missingMetric">0</strong>
             </article>
             <article class="metric">
-              <span>Chờ duyệt</span>
+              <span>Hợp lệ</span>
               <strong id="pendingMetric">0</strong>
             </article>
             <article class="metric">
@@ -144,13 +144,13 @@
             <table>
               <thead>
                 <tr>
-                  <th>Mã đơn</th>
-                  <th>Ngày tạo</th>
+                  <th>Mã phiếu</th>
+                  <th>Ngày hiệu lực</th>
                   <th>Miền</th>
                   <th>Khách hàng</th>
-                  <th>Nhân viên</th>
-                  <th>Sản phẩm</th>
-                  <th>Số ảnh</th>
+                  <th>Nhân viên kinh doanh</th>
+                  <th>Số lượng ảnh</th>
+                  <th>Ngày cập nhật cuối</th>
                   <th>Trạng thái</th>
                   <th></th>
                 </tr>
@@ -165,11 +165,11 @@
             <table>
               <thead>
                 <tr>
-                  <th>Mã đơn</th>
-                  <th>Ngày tạo</th>
+                  <th>Mã phiếu</th>
+                  <th>Ngày hiệu lực</th>
                   <th>Miền</th>
                   <th>Khách hàng</th>
-                  <th>Nhân viên</th>
+                  <th>Nhân viên kinh doanh</th>
                   <th>Ghi chú</th>
                 </tr>
               </thead>
@@ -182,100 +182,33 @@
           <div class="gallery-layout">
             <div class="order-list" id="galleryOrders"></div>
             <div class="gallery-view">
+              <section class="upload-panel">
+                <div>
+                  <h3>Upload hình trực tiếp</h3>
+                  <p id="uploadOrderMeta">Chọn một mã phiếu bên trái hoặc bấm “+ Upload” ở bảng danh sách.</p>
+                </div>
+                <div class="upload-controls">
+                  <input id="uploadFileInput" type="file" accept="image/*" multiple />
+                  <label class="upload-pick-btn" for="uploadFileInput">+ Chọn hình</label>
+                  <button id="uploadBtn" class="primary-btn" type="button" disabled>Upload hình</button>
+                </div>
+                <p id="uploadMessage" class="upload-message" aria-live="polite"></p>
+              </section>
               <div class="gallery-header">
                 <div>
                   <h3 id="galleryTitle">Chọn một đơn để xem ảnh</h3>
                   <p id="galleryMeta"></p>
                 </div>
                 <a id="openFolderLink" class="ghost-link" href="#" target="_blank" rel="noreferrer" hidden>Mở Drive</a>
-                <button id="approveBtn" class="primary-btn" hidden>Duyệt</button>
-                <button id="rejectBtn" class="ghost-link" hidden>Từ chối</button>
               </div>
               <div class="image-grid" id="imageGrid"></div>
             </div>
-          </div>
-        </section>
-
-        <section class="panel tab-panel" id="donePanel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Mã đơn</th>
-                  <th>Ngày tạo</th>
-                  <th>Miền</th>
-                  <th>Khách hàng</th>
-                  <th>Nhân viên</th>
-                  <th>Số ảnh</th>
-                  <th>Người duyệt</th>
-                  <th>Ngày duyệt</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="doneBody"></tbody>
-            </table>
-          </div>
-          <div id="doneImageGrid" class="image-grid" style="margin-top:16px"></div>
-          <div style="display:none">
-            </table>
-          </div>
-        </section>
-
-        <section class="panel tab-panel" id="donePanel">
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Mã đơn</th>
-                  <th>Ngày tạo</th>
-                  <th>Miền</th>
-                  <th>Khách hàng</th>
-                  <th>Nhân viên</th>
-                  <th>Số ảnh</th>
-                  <th>Người duyệt</th>
-                  <th>Ngày duyệt</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="doneBody"></tbody>
-            </table>
-          </div>
-          <div id="doneImageGrid" class="image-grid" style="margin-top:16px"></div>
-          <div style="display:none">
-            </table>
           </div>
         </section>
         <footer class="app-footer">© 2026 Trade Marketing Tools v1.0</footer>
       </main>
 
     </div>
-
-    <dialog id="uploadModal" style="background:#0c1e2e;border:1px solid rgba(45,164,221,.22);border-radius:14px;padding:0;max-width:520px;width:100%;color:#e8f1f8">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid rgba(45,164,221,.14)">
-        <div>
-          <div id="uploadModalTitle" style="font:600 15px Inter,sans-serif"></div>
-          <div id="uploadModalMeta" style="font-size:12px;color:#89a8ba;margin-top:2px"></div>
-        </div>
-        <button onclick="document.getElementById('uploadModal').close()" style="width:28px;height:28px;border-radius:7px;border:1px solid rgba(45,164,221,.2);background:transparent;color:#89a8ba;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">×</button>
-      </div>
-      <div style="padding:20px">
-        <div id="uploadDropzone" class="upload-dz" style="border:1.5px dashed rgba(45,164,221,.3);border-radius:11px;padding:28px 20px;text-align:center;cursor:pointer;color:#89a8ba;font-size:13px;margin-bottom:14px;transition:background .15s">
-        </div>
-        <div id="uploadWarn" style="background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);border-radius:8px;padding:9px 13px;font-size:12px;color:#f59e0b;margin-bottom:10px" hidden></div>
-        <div id="uploadPreviewGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:12px"></div>
-        <div id="uploadSuccessBox" style="background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:9px;padding:11px 14px;font:500 13px Inter,sans-serif;color:#22c55e;margin-bottom:12px" hidden></div>
-        <button id="uploadSubmitBtn" onclick="doUploadSubmit()" hidden style="width:100%;padding:11px;border-radius:10px;border:none;background:linear-gradient(135deg,#054668,#0a5a82);color:#d6f2ff;font:600 14px Inter,sans-serif;cursor:pointer">Upload ảnh</button>
-      </div>
-    </dialog>
-    <style>
-      .up-prev-item{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#112336;border:1px solid rgba(45,164,221,.14)}
-      .up-prev-item img{width:100%;height:100%;object-fit:cover}
-      .up-prev-remove{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.75);border:none;color:#fff;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
-      .up-prev-remove:hover{background:#ef4444}
-      .upload-dz:hover,.upload-dz.dz-over{background:rgba(45,164,221,.08);border-color:#2da4dd}
-      #uploadModal::backdrop{background:rgba(0,0,0,.7)}
-      #rejectBtn{color:#ef4444;border-color:rgba(239,68,68,.35)}
-    </style>
 
     <dialog id="previewDialog">
       <button class="close-btn" id="closePreview" aria-label="Đóng">×</button>
@@ -331,6 +264,6 @@
         document.addEventListener("pointerleave", reset);
       })();
     </script>
-    <script src="app.js?v=12"></script>
+    <script src="app.js?v=14"></script>
   </body>
 </html>

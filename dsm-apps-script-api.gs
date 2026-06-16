@@ -42,6 +42,10 @@ function buildDsmReportData_(e) {
 
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (e && e.parameter && e.parameter.debugAuth) {
+      return buildAuthDebug_(ss, e.parameter.authPhone);
+    }
+
     const auth = authorizeDsmUser_(ss, e && e.parameter && e.parameter.authPhone);
     if (auth.authorized && e && e.parameter && e.parameter.authEvent === "login") {
       logDsmAccess_(ss, auth.user, e);
@@ -232,6 +236,7 @@ function formatDateTime_(date) {
 
 function authorizeDsmUser_(ss, phone) {
   const normalizedPhone = normalizePhone_(phone);
+  const comparablePhone = normalizePhoneForCompare_(phone);
   if (!normalizedPhone) {
     return {
       authorized: false,
@@ -240,7 +245,7 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  const sheet = ss.getSheetByName(DSM_STAFF_SHEET_NAME);
+  const sheet = findSheetByNormalizedName_(ss, DSM_STAFF_SHEET_NAME);
   if (!sheet) {
     return {
       authorized: false,
@@ -258,15 +263,20 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  const headers = rows[0].map(value => String(value || "").trim());
+  const headerRowIndex = findStaffHeaderRow_(rows);
+  const headers = rows[headerRowIndex].map(value => String(value || "").trim());
   const headerMap = buildHeaderMap_(headers);
-  const phoneCol = findMappedColumn_(headerMap, ["SDT", "SĐT", "SO DIEN THOAI", "DIEN THOAI", "PHONE"]);
-  const nameCol = findMappedColumn_(headerMap, ["HO TEN", "TEN", "NHAN SU", "NAME"]);
+  let phoneCol = findMappedColumn_(headerMap, ["SDT", "SĐT", "SO DIEN THOAI", "DIEN THOAI", "PHONE"]);
+  let nameCol = findMappedColumn_(headerMap, ["HO TEN", "TEN", "NHAN SU", "NAME"]);
   const deptCol = findMappedColumn_(headerMap, ["PHONG BAN", "BO PHAN", "DEPARTMENT"]);
   const titleCol = findMappedColumn_(headerMap, ["CHUC DANH", "CHUC VU", "TITLE"]);
   const regionCol = findMappedColumn_(headerMap, ["KHU VUC", "MIEN/KHU VUC", "MIEN", "REGION"]);
   const roleCol = findMappedColumn_(headerMap, ["VAI TRO", "ROLE"]);
   const statusCol = findMappedColumn_(headerMap, ["TRANG THAI", "STATUS"]);
+
+  // Fallbacks for compact staff sheets if headers are edited later.
+  if (phoneCol < 0) phoneCol = findLikelyPhoneColumn_(rows, headerRowIndex + 1);
+  if (nameCol < 0) nameCol = findLikelyNameColumn_(rows, headerRowIndex + 1, phoneCol);
 
   if (phoneCol < 0) {
     return {
@@ -276,9 +286,10 @@ function authorizeDsmUser_(ss, phone) {
     };
   }
 
-  for (let i = 1; i < rows.length; i += 1) {
+  for (let i = headerRowIndex + 1; i < rows.length; i += 1) {
     const row = rows[i] || [];
-    if (normalizePhone_(row[phoneCol]) !== normalizedPhone) continue;
+    const rowPhone = normalizePhone_(row[phoneCol]);
+    if (rowPhone !== normalizedPhone && normalizePhoneForCompare_(row[phoneCol]) !== comparablePhone) continue;
 
     const status = statusCol >= 0 ? normalizeDsmKey_(row[statusCol]) : "ACTIVE";
     const isActive = !status || status === "ACTIVE" || status === "HOAT DONG" || status === "DANG LAM";
@@ -309,6 +320,69 @@ function authorizeDsmUser_(ss, phone) {
     reason: "not_found",
     message: "Bạn không có quyền truy cập chức năng này."
   };
+}
+
+function findSheetByNormalizedName_(ss, expectedName) {
+  const expectedKey = normalizeDsmKey_(expectedName);
+  const sheets = ss.getSheets();
+  for (let i = 0; i < sheets.length; i += 1) {
+    if (normalizeDsmKey_(sheets[i].getName()) === expectedKey) return sheets[i];
+  }
+  return null;
+}
+
+function findStaffHeaderRow_(rows) {
+  const required = ["SDT", "SĐT", "SO DIEN THOAI", "PHONE", "HO TEN", "TEN", "TRANG THAI", "VAI TRO"];
+  let bestIndex = 0;
+  let bestHits = -1;
+  const limit = Math.min(rows.length, 10);
+  for (let i = 0; i < limit; i += 1) {
+    const normalized = (rows[i] || []).map(normalizeDsmKey_);
+    const hits = required.filter(key => normalized.indexOf(normalizeDsmKey_(key)) !== -1).length;
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestIndex = i;
+    }
+    if (hits >= 2) return i;
+  }
+  return bestIndex;
+}
+
+function findLikelyPhoneColumn_(rows, startRow) {
+  const maxCols = Math.max.apply(null, rows.map(row => row.length));
+  let bestCol = -1;
+  let bestHits = 0;
+  for (let col = 0; col < maxCols; col += 1) {
+    let hits = 0;
+    for (let row = startRow; row < Math.min(rows.length, startRow + 25); row += 1) {
+      const phone = normalizePhone_(rows[row] && rows[row][col]);
+      if (phone.length >= 9 && phone.length <= 11) hits += 1;
+    }
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestCol = col;
+    }
+  }
+  return bestHits ? bestCol : -1;
+}
+
+function findLikelyNameColumn_(rows, startRow, phoneCol) {
+  const maxCols = Math.max.apply(null, rows.map(row => row.length));
+  let bestCol = -1;
+  let bestHits = 0;
+  for (let col = 0; col < maxCols; col += 1) {
+    if (col === phoneCol) continue;
+    let hits = 0;
+    for (let row = startRow; row < Math.min(rows.length, startRow + 25); row += 1) {
+      const text = String(rows[row] && rows[row][col] || "").trim();
+      if (text && !/^\d+$/.test(text)) hits += 1;
+    }
+    if (hits > bestHits) {
+      bestHits = hits;
+      bestCol = col;
+    }
+  }
+  return bestHits ? bestCol : -1;
 }
 
 function logDsmAccess_(ss, user, e) {
@@ -348,6 +422,71 @@ function findMappedColumn_(headerMap, aliases) {
 
 function normalizePhone_(phone) {
   return String(phone || "").replace(/[^\d]/g, "");
+}
+
+function normalizePhoneForCompare_(phone) {
+  const digits = normalizePhone_(phone);
+  return digits.replace(/^0+/, "");
+}
+
+function buildAuthDebug_(ss, phone) {
+  const normalizedPhone = normalizePhone_(phone);
+  const comparablePhone = normalizePhoneForCompare_(phone);
+  const sheet = findSheetByNormalizedName_(ss, DSM_STAFF_SHEET_NAME);
+  const auth = authorizeDsmUser_(ss, phone);
+
+  if (!sheet) {
+    return {
+      generatedAt: formatDateTime_(new Date()),
+      mode: "debugAuth",
+      spreadsheetName: ss ? ss.getName() : "",
+      sheetNames: ss ? ss.getSheets().map(sheetItem => sheetItem.getName()) : [],
+      phoneInput: String(phone || ""),
+      phoneNormalized: normalizedPhone,
+      phoneCompare: comparablePhone,
+      staffSheetFound: false,
+      auth: auth
+    };
+  }
+
+  const rows = sheet.getDataRange().getDisplayValues();
+  const headerRowIndex = findStaffHeaderRow_(rows);
+  const headers = rows[headerRowIndex] || [];
+  const headerMap = buildHeaderMap_(headers);
+  let phoneCol = findMappedColumn_(headerMap, ["SDT", "SĐT", "SO DIEN THOAI", "DIEN THOAI", "PHONE"]);
+  let nameCol = findMappedColumn_(headerMap, ["HO TEN", "TEN", "NHAN SU", "NAME"]);
+  const statusCol = findMappedColumn_(headerMap, ["TRANG THAI", "STATUS"]);
+
+  if (phoneCol < 0) phoneCol = findLikelyPhoneColumn_(rows, headerRowIndex + 1);
+  if (nameCol < 0) nameCol = findLikelyNameColumn_(rows, headerRowIndex + 1, phoneCol);
+
+  const samples = rows.slice(headerRowIndex + 1, headerRowIndex + 9).map((row, index) => ({
+    row: headerRowIndex + 2 + index,
+    phoneRaw: phoneCol >= 0 ? row[phoneCol] : "",
+    phoneNormalized: phoneCol >= 0 ? normalizePhone_(row[phoneCol]) : "",
+    phoneCompare: phoneCol >= 0 ? normalizePhoneForCompare_(row[phoneCol]) : "",
+    name: nameCol >= 0 ? row[nameCol] : "",
+    status: statusCol >= 0 ? row[statusCol] : ""
+  }));
+
+  return {
+    generatedAt: formatDateTime_(new Date()),
+    mode: "debugAuth",
+    spreadsheetName: ss ? ss.getName() : "",
+    sheetNames: ss ? ss.getSheets().map(sheetItem => sheetItem.getName()) : [],
+    phoneInput: String(phone || ""),
+    phoneNormalized: normalizedPhone,
+    phoneCompare: comparablePhone,
+    staffSheetFound: true,
+    staffSheetName: sheet.getName(),
+    headerRow: headerRowIndex + 1,
+    headers: headers,
+    phoneCol: phoneCol + 1,
+    nameCol: nameCol + 1,
+    statusCol: statusCol + 1,
+    sampleRows: samples,
+    auth: auth
+  };
 }
 
 function toDsmNumber_(value) {

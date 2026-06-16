@@ -1,6 +1,20 @@
 const DEFAULT_SHEETS = ["Miền Tây", "Miền Đông", "Hồ Chí Minh", "Miền Trung"];
-const HEADER_ROW_INDEX = 1;
-const DATA_START_INDEX = 2;
+const HEADER_SCAN_LIMIT = 12;
+const MAX_IMAGES_PER_ORDER = 10;
+
+const FIELD_ALIASES = {
+  orderCode: ["Mã phiếu", "Mã đơn", "Mã đơn hàng", "Mã đơn hàng/phiếu", "Order Code"],
+  date: ["Ngày hiệu lực", "Ngày tạo", "Ngày", "Ngày chứng từ"],
+  sales: ["Nhân viên kinh doanh", "Nhân viên", "Sales", "Sale"],
+  customer: ["Khách hàng", "Tên khách hàng", "Customer"],
+  area: ["Khu vực", "Miền/Khu vực", "Miền", "Region"],
+  product: ["Sản phẩm", "Mã hàng", "Tên hàng"],
+  quantity: ["Số lượng", "SL"],
+  note: ["Ghi chú chung", "Ghi chú", "Nội dung", "Note"],
+  imageStatus: ["Trạng thái hình ảnh", "MKT check", "Trạng thái"],
+  folderId: ["Link thư mục Drive", "Folder ID", "Folder", "Drive Folder", "Link Drive"],
+  lastUpdated: ["Ngày cập nhật cuối", "Cập nhật cuối", "Thời gian upload", "Ngày cập nhật"]
+};
 
 function json(res, statusCode, body) {
   res.statusCode = statusCode;
@@ -13,18 +27,76 @@ function normalize(value) {
   return String(value || "").trim();
 }
 
+function normalizeKey(value) {
+  return normalize(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/g, "d")
+    .replace(/Đ/g, "D")
+    .replace(/[_\-./]+/g, " ")
+    .replace(/\s+/g, " ")
+    .toUpperCase();
+}
+
 function extractFolderId(value) {
   const match = normalize(value).match(/[-\w]{25,}/);
   return match ? match[0] : "";
 }
 
-function truthy(value) {
-  const normalized = normalize(value).toLowerCase();
-  return normalized === "true" || normalized === "yes" || normalized === "x" || normalized === "đã duyệt";
+function col(headers, aliases) {
+  const keys = new Set(aliases.map(normalizeKey));
+  return headers.findIndex(header => keys.has(normalizeKey(header)));
 }
 
-function col(headers, name) {
-  return headers.findIndex(header => normalize(header) === name);
+function detectHeaderRow(rows) {
+  const limit = Math.min(rows.length, HEADER_SCAN_LIMIT);
+  let best = { index: -1, score: 0, indexes: {} };
+
+  for (let i = 0; i < limit; i += 1) {
+    const headers = rows[i] || [];
+    const indexes = {};
+    Object.entries(FIELD_ALIASES).forEach(([field, aliases]) => {
+      indexes[field] = col(headers, aliases);
+    });
+
+    const score = [
+      indexes.orderCode,
+      indexes.customer,
+      indexes.folderId,
+      indexes.date,
+      indexes.sales,
+      indexes.area
+    ].filter(index => index >= 0).length;
+
+    if (score > best.score) best = { index: i, score, indexes };
+  }
+
+  return best.score >= 3 ? best : { index: -1, score: 0, indexes: {} };
+}
+
+function getCell(row, index) {
+  return index >= 0 ? normalize(row[index]) : "";
+}
+
+function shouldSkipRow(row, indexes) {
+  const note = normalizeKey(getCell(row, indexes.note));
+  const status = normalizeKey(getCell(row, indexes.imageStatus));
+  return note.includes("DSM") || status.includes("DSM");
+}
+
+function imageStatusFromCount(count, folderError) {
+  if (folderError) return "Lỗi folder";
+  if (count <= 0) return "Chưa cập nhật";
+  if (count >= MAX_IMAGES_PER_ORDER) return "Đã đủ ảnh";
+  return "Hợp lệ";
+}
+
+function listStatusFromCount(count, folderError) {
+  if (folderError) return "Lỗi folder";
+  if (count <= 0) return "Chưa cập nhật";
+  if (count > MAX_IMAGES_PER_ORDER) return "Vượt giới hạn";
+  if (count === MAX_IMAGES_PER_ORDER) return "Đã đủ ảnh";
+  return "Hợp lệ";
 }
 
 async function listFiles(drive, folderId) {
@@ -33,8 +105,8 @@ async function listFiles(drive, folderId) {
 
   do {
     const response = await drive.files.list({
-      q: `'${folderId}' in parents and trashed = false`,
-      fields: "nextPageToken, files(id, name, mimeType, thumbnailLink, webViewLink)",
+      q: `'${folderId}' in parents and trashed = false and mimeType contains 'image/'`,
+      fields: "nextPageToken, files(id, name, mimeType, thumbnailLink, webViewLink, createdTime, modifiedTime)",
       pageSize: 1000,
       pageToken,
       supportsAllDrives: true,
@@ -45,14 +117,16 @@ async function listFiles(drive, folderId) {
     pageToken = response.data.nextPageToken;
   } while (pageToken);
 
+  files.sort((a, b) => new Date(b.modifiedTime || b.createdTime || 0) - new Date(a.modifiedTime || a.createdTime || 0));
   return files;
 }
 
 function buildRanges(sheetNames) {
-  return sheetNames.map(sheetName => `'${sheetName.replace(/'/g, "''")}'!A:Z`);
+  return sheetNames.map(sheetName => `'${sheetName.replace(/'/g, "''")}'!A:AZ`);
 }
 
 function formatVietnamDateTime(date) {
+  if (!date) return "";
   return new Intl.DateTimeFormat("vi-VN", {
     timeZone: "Asia/Ho_Chi_Minh",
     day: "2-digit",
@@ -62,6 +136,11 @@ function formatVietnamDateTime(date) {
     minute: "2-digit",
     hour12: false
   }).format(date).replace(",", "");
+}
+
+function latestImageDate(files, fallback) {
+  const latest = files[0] && (files[0].modifiedTime || files[0].createdTime);
+  return latest ? formatVietnamDateTime(new Date(latest)) : normalize(fallback);
 }
 
 module.exports = async function handler(req, res) {
@@ -80,10 +159,10 @@ module.exports = async function handler(req, res) {
       res.setHeader("Content-Type", "application/json; charset=utf-8");
       res.setHeader("Cache-Control", "no-store");
       res.end(isJson ? text : JSON.stringify({
-          error: "Apps Script chưa trả JSON. Kiểm tra Web App đã deploy với quyền Anyone with the link chưa.",
-          status: response.status,
-          preview: text.slice(0, 180)
-        }));
+        error: "Apps Script chưa trả JSON. Kiểm tra Web App đã deploy với quyền Anyone with the link chưa.",
+        status: response.status,
+        preview: text.slice(0, 180)
+      }));
       return;
     }
 
@@ -119,36 +198,23 @@ module.exports = async function handler(req, res) {
 
     for (const valueRange of sheetResponse.data.valueRanges || []) {
       const match = valueRange.range.match(/^'?(.*?)'?!/);
-      const region = match ? match[1].replace(/''/g, "'") : "";
+      const sheetName = match ? match[1].replace(/''/g, "'") : "";
       const rows = valueRange.values || [];
-      const headers = rows[HEADER_ROW_INDEX] || [];
+      const headerInfo = detectHeaderRow(rows);
+      if (headerInfo.index < 0) continue;
 
-      const indexes = {
-        orderCode: col(headers, "Mã đơn hàng"),
-        date: col(headers, "Ngày tạo"),
-        sales: col(headers, "Nhân viên kinh doanh"),
-        customer: col(headers, "Khách hàng"),
-        area: col(headers, "Khu vực"),
-        product: col(headers, "Sản phẩm"),
-        quantity: col(headers, "Số lượng"),
-        mktCheck: col(headers, "MKT check"),
-        checkResult: col(headers, "Kết quả check ảnh"),
-        sysNote: col(headers, "Ghi chú hệ thống"),
-        folderId: col(headers, "Folder ID")
-      };
-
-      if (indexes.orderCode === -1 || indexes.folderId === -1) continue;
-
+      const indexes = headerInfo.indexes;
       const seenInSheet = new Set();
 
-      for (let rowIndex = DATA_START_INDEX; rowIndex < rows.length; rowIndex += 1) {
+      for (let rowIndex = headerInfo.index + 1; rowIndex < rows.length; rowIndex += 1) {
         const row = rows[rowIndex] || [];
-        const orderCode = normalize(row[indexes.orderCode]);
-        const folderId = extractFolderId(row[indexes.folderId]);
+        const orderCode = getCell(row, indexes.orderCode);
+        const folderId = extractFolderId(getCell(row, indexes.folderId));
+        const customer = getCell(row, indexes.customer);
 
-        if (!orderCode || !folderId) continue;
+        if (!orderCode || !folderId || shouldSkipRow(row, indexes)) continue;
 
-        const key = `${region}|${orderCode}|${folderId}`;
+        const key = `${sheetName}|${orderCode}|${folderId}`;
         if (seenInSheet.has(key)) continue;
         seenInSheet.add(key);
 
@@ -159,44 +225,40 @@ module.exports = async function handler(req, res) {
           if (!folderCache.has(folderId)) {
             folderCache.set(folderId, await listFiles(drive, folderId));
           }
-          files = folderCache.get(folderId).filter(file => (
-            normalize(file.name).includes(orderCode) &&
-            normalize(file.mimeType).startsWith("image/")
-          ));
+          files = folderCache.get(folderId);
         } catch (err) {
           error = err.message || "Không đọc được folder Drive.";
         }
 
         const imageCount = files.length;
-        const checkResult = indexes.checkResult >= 0 ? normalize(row[indexes.checkResult]) : "";
-        const approved = truthy(checkResult) || (indexes.mktCheck >= 0 && truthy(row[indexes.mktCheck]));
-        const sysNoteRaw = indexes.sysNote >= 0 ? normalize(row[indexes.sysNote]) : "";
-        const approvedBy = sysNoteRaw.split(" | ")[0] || "";
-        const approvedAt = sysNoteRaw.split(" | ")[1] || "";
-        if (rowIndex === 2) console.log("[DEBUG] mktCheck index:", indexes.mktCheck, "headers:", JSON.stringify(headers), "raw value:", JSON.stringify(row[indexes.mktCheck]));
+        const status = listStatusFromCount(imageCount, Boolean(error));
+        const region = getCell(row, indexes.area) || sheetName;
 
         orders.push({
-          id: `${region}-${rowIndex}-${orderCode}`,
+          id: `${sheetName}-${rowIndex}-${orderCode}`,
           sheet: region,
+          sourceSheet: sheetName,
           rowNumber: rowIndex + 1,
           orderCode,
-          date: indexes.date >= 0 ? normalize(row[indexes.date]) : "",
-          sales: indexes.sales >= 0 ? normalize(row[indexes.sales]) : "",
-          customer: indexes.customer >= 0 ? normalize(row[indexes.customer]) : "",
-          area: indexes.area >= 0 ? normalize(row[indexes.area]) : region,
-          product: indexes.product >= 0 ? normalize(row[indexes.product]) : "",
-          quantity: indexes.quantity >= 0 ? normalize(row[indexes.quantity]) : "",
+          date: getCell(row, indexes.date),
+          sales: getCell(row, indexes.sales),
+          customer,
+          area: region,
+          product: getCell(row, indexes.product),
+          quantity: getCell(row, indexes.quantity),
           folderId,
           imageCount,
-          approved,
-          approvedBy: indexes.approvedBy >= 0 ? normalize(row[indexes.approvedBy]) : "",
-          approvedAt: indexes.approvedAt >= 0 ? normalize(row[indexes.approvedAt]) : "",
-          status: error ? "Lỗi folder" : imageCount > 0 ? "Đã upload" : "Thiếu hình",
-          note: error || (imageCount > 0 ? "" : `Không thấy file có chứa mã đơn: ${orderCode}`),
+          imageLimit: MAX_IMAGES_PER_ORDER,
+          lastImageUpdate: latestImageDate(files, getCell(row, indexes.lastUpdated)),
+          approved: imageCount > 0,
+          status,
+          note: error || (imageCount > 0 ? "" : `Chưa có hình cho mã phiếu: ${orderCode}`),
           images: files.map(file => ({
             id: file.id,
             name: file.name,
             mimeType: file.mimeType,
+            createdAt: formatVietnamDateTime(new Date(file.createdTime || file.modifiedTime)),
+            updatedAt: formatVietnamDateTime(new Date(file.modifiedTime || file.createdTime)),
             thumbnailUrl: `/api/image?id=${encodeURIComponent(file.id)}&thumb=1`,
             imageUrl: `/api/image?id=${encodeURIComponent(file.id)}`,
             webViewLink: file.webViewLink || ""
@@ -210,12 +272,13 @@ module.exports = async function handler(req, res) {
       reported: orders.filter(order => order.imageCount > 0).length,
       notReported: orders.filter(order => order.imageCount === 0 && order.status !== "Lỗi folder").length,
       missingImages: orders.filter(order => order.imageCount === 0).length,
-      pendingReview: orders.filter(order => order.imageCount > 0 && !order.approved).length,
-      folderErrors: orders.filter(order => order.status === "Lỗi folder").length
+      pendingReview: orders.filter(order => order.imageCount > 0 && order.imageCount < MAX_IMAGES_PER_ORDER).length,
+      folderErrors: orders.filter(order => order.status === "Lỗi folder").length,
+      completed: orders.filter(order => order.imageCount >= MAX_IMAGES_PER_ORDER).length
     };
 
     const byRegion = sheetNames.map(sheetName => {
-      const regionOrders = orders.filter(order => order.sheet === sheetName);
+      const regionOrders = orders.filter(order => order.sourceSheet === sheetName || order.sheet === sheetName);
       return {
         region: sheetName,
         total: regionOrders.length,

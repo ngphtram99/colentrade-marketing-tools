@@ -516,7 +516,8 @@ body::before{
 const API = 'https://script.google.com/macros/s/AKfycbzByBKq9qOmA8HmWj_fODpsUkTG5CHrxcMF0DsI27zg0EL9sQHtmI87-maho6oFkctV/exec';
 const DEFAULT_MONTH_OPTIONS = ['4/2026', '5/2026', '6/2026', 'Tất cả'];
 const DEFAULT_REGION_OPTIONS = ['Hồ Chí Minh', 'Miền Đông', 'Miền Tây', 'Miền Trung', 'OEM', 'Miền Bắc', 'Tất cả'];
-const AUTH_STORAGE_KEY = 'dsm-auth-phone';
+const AUTH_STORAGE_KEY = 'dsm-auth-session';
+const AUTH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 let KH = [], SUMMARY = [], selRegion = '', selMonth = '', fallbackMonth = '', updatedAt = '', currentTab = 'kh', requestId = 0;
 let authPhone = '', authUser = null;
 
@@ -807,6 +808,37 @@ function cleanPhone(value) {
   return String(value || '').replace(/[^\d]/g, '');
 }
 
+function saveAuthSession(phone) {
+  const clean = cleanPhone(phone);
+  if (!clean) return;
+  localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({
+    phone: clean,
+    expiresAt: Date.now() + AUTH_TTL_MS
+  }));
+}
+
+function getSavedAuthPhone() {
+  const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return '';
+  try {
+    const session = JSON.parse(raw);
+    const phone = cleanPhone(session.phone);
+    if (!phone || !session.expiresAt || Date.now() > Number(session.expiresAt)) {
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      return '';
+    }
+    return phone;
+  } catch(e) {
+    const legacyPhone = cleanPhone(raw);
+    if (legacyPhone) {
+      saveAuthSession(legacyPhone);
+      return legacyPhone;
+    }
+    localStorage.removeItem(AUTH_STORAGE_KEY);
+    return '';
+  }
+}
+
 function setAuthLoading(isLoading) {
   const button = document.getElementById('auth-submit');
   const input = document.getElementById('auth-phone');
@@ -823,10 +855,16 @@ function showAuthError(message) {
   error.style.display = 'block';
 }
 
+function formatAuthError(auth) {
+  const base = auth && auth.message ? auth.message : 'Bạn không có quyền truy cập chức năng này.';
+  const reason = auth && auth.reason ? ` (${auth.reason})` : '';
+  return base + reason;
+}
+
 function setAuthorized(auth) {
   authUser = auth.user || {};
   authPhone = cleanPhone(authUser.phone || authPhone);
-  localStorage.setItem(AUTH_STORAGE_KEY, authPhone);
+  saveAuthSession(authPhone);
   document.getElementById('auth-panel').hidden = true;
   document.getElementById('secure-app').hidden = false;
   document.getElementById('user-name').textContent = authUser.name || authPhone;
@@ -847,7 +885,7 @@ function requestAuth(phone, isLogin) {
       } else {
         localStorage.removeItem(AUTH_STORAGE_KEY);
         authPhone = '';
-        showAuthError(auth.message);
+        showAuthError(formatAuthError(auth));
       }
     } catch(e) {
       showAuthError('Không kiểm tra được quyền truy cập. Vui lòng thử lại.');
@@ -899,7 +937,7 @@ function logoutAuth() {
 }
 
 function initAuth() {
-  const savedPhone = cleanPhone(localStorage.getItem(AUTH_STORAGE_KEY));
+  const savedPhone = getSavedAuthPhone();
   document.getElementById('sub-text').textContent = 'locked';
   document.getElementById('auth-phone').addEventListener('keydown', event => {
     if (event.key === 'Enter') submitAuth();
@@ -967,7 +1005,7 @@ function showError() {
 function parseData(raw) {
   if (raw && raw.auth && !raw.auth.authorized) {
     logoutAuth();
-    showAuthError(raw.auth.message);
+    showAuthError(formatAuthError(raw.auth));
     return;
   }
   if (raw && raw.auth && raw.auth.user) {
