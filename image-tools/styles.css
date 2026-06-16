@@ -241,7 +241,6 @@ input {
 .metric::before,
 .region-card::before,
 .work-panel::before,
-.upload-panel::before,
 .image-card::before {
   content: "";
   position: absolute;
@@ -261,7 +260,6 @@ input {
 .metric:hover::before,
 .region-card:hover::before,
 .work-panel:hover::before,
-.upload-panel:hover::before,
 .image-card:hover::before {
   opacity: 1;
   animation: borderRun 1.8s linear infinite;
@@ -651,95 +649,6 @@ tbody tr:hover {
   margin-bottom: 16px;
 }
 
-.upload-panel {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px;
-  align-items: center;
-  margin-bottom: 16px;
-  padding: 14px;
-  border: 1px solid rgba(5, 70, 104, 0.14);
-  border-radius: 10px;
-  background: #ffffff;
-}
-
-.upload-panel h3,
-.upload-panel p {
-  margin: 0;
-}
-
-.upload-panel p {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.upload-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.upload-controls input {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.upload-pick-btn {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(45, 164, 221, 0.34);
-  border-radius: 8px;
-  padding: 0 14px;
-  background: rgba(45, 164, 221, 0.12);
-  color: var(--brand);
-  font-weight: 800;
-  cursor: pointer;
-  transition: transform var(--motion), background var(--motion), color var(--motion), box-shadow var(--motion), border-color var(--motion);
-}
-
-.upload-pick-btn:hover {
-  transform: translateY(-1px);
-  border-color: rgba(45, 164, 221, 0.76);
-  background: rgba(45, 164, 221, 0.2);
-  box-shadow: 0 10px 24px rgba(45, 164, 221, 0.18);
-}
-
-.upload-controls input:disabled + .upload-pick-btn {
-  cursor: not-allowed;
-  opacity: 0.45;
-  transform: none;
-  box-shadow: none;
-}
-
-.upload-controls .primary-btn {
-  width: auto;
-  min-width: 130px;
-}
-
-.upload-message {
-  grid-column: 1 / -1;
-  min-height: 18px;
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.upload-message.is-error {
-  color: var(--danger);
-}
-
-.upload-message.is-success {
-  color: var(--ok);
-}
-
 .gallery-header h3,
 .gallery-header p {
   margin: 0;
@@ -804,13 +713,6 @@ tbody tr:hover {
   color: var(--muted);
   font-size: 12px;
   word-break: break-word;
-}
-
-.image-card small {
-  display: block;
-  padding: 0 10px 10px;
-  color: var(--muted);
-  font: 11px "JetBrains Mono", ui-monospace, monospace;
 }
 
 .empty {
@@ -1273,7 +1175,6 @@ input:focus {
 .metric,
 .region-card,
 .work-panel,
-.upload-panel,
 .image-card {
   position: relative;
   overflow: hidden;
@@ -1288,7 +1189,6 @@ input:focus {
 .metric::before,
 .region-card::before,
 .work-panel::before,
-.upload-panel::before,
 .image-card::before {
   opacity: 0.58;
   animation: borderRun 6.8s linear infinite;
@@ -1365,19 +1265,6 @@ th {
 .table-wrap {
   background: rgba(6, 17, 29, 0.48);
   border-color: rgba(45, 164, 221, 0.18);
-}
-
-.upload-panel {
-  background: rgba(6, 17, 29, 0.58);
-  border-color: rgba(45, 164, 221, 0.2);
-}
-
-.upload-panel h3 {
-  color: #f2fbff;
-}
-
-.upload-controls input {
-  background: rgba(4, 13, 22, 0.76);
 }
 
 table {
@@ -1459,7 +1346,6 @@ th {
   .region-grid,
   .overview-split,
   .system-grid,
-  .upload-panel,
   .gallery-layout {
     grid-template-columns: 1fr;
   }
@@ -1467,4 +1353,519 @@ th {
   .last-updated {
     justify-self: start;
   }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE COMPACT VIEW — Tất cả phiếu
+   Chỉ hiện: Mã đơn, Ngày tạo, Miền, Khách hàng, Trạng thái, Xem ảnh
+   Bảng table → card-stack trên màn hình nhỏ
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+
+  /* Áp dụng riêng cho bảng "Tất cả phiếu" (#ordersBody) */
+  #ordersPanel .table-wrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  #ordersPanel table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  /* Ẩn header gốc, dùng data-label làm tiêu đề trong card */
+  #ordersPanel thead {
+    display: none;
+  }
+
+  #ordersPanel tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "code   action"
+      "date   date"
+      "region region"
+      "customer customer"
+      "status status";
+    gap: 6px 10px;
+    padding: 14px;
+    border: 1px solid rgba(45, 164, 221, 0.18);
+    border-radius: 12px;
+    background: rgba(8, 25, 38, 0.82);
+    box-shadow: var(--shadow-soft);
+  }
+
+  #ordersPanel tbody tr:hover {
+    background: rgba(8, 25, 38, 0.82);
+  }
+
+  #ordersPanel td {
+    display: block;
+    border: 0;
+    padding: 0;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  /* Ẩn các cột không cần trên mobile: Nhân viên, Sản phẩm, Số ảnh */
+  #ordersPanel td:nth-child(5),  /* Nhân viên */
+  #ordersPanel td:nth-child(6),  /* Sản phẩm */
+  #ordersPanel td:nth-child(7) { /* Số ảnh */
+    display: none;
+  }
+
+  /* Gán vùng grid cho từng cột còn lại */
+  #ordersPanel td:nth-child(1) { grid-area: code;     font-size: 15px; }
+  #ordersPanel td:nth-child(2) { grid-area: date;     color: var(--muted); font-size: 13px; }
+  #ordersPanel td:nth-child(3) { grid-area: region;   color: var(--muted); font-size: 13px; }
+  #ordersPanel td:nth-child(4) { grid-area: customer; font-size: 14px; font-weight: 600; }
+  #ordersPanel td:nth-child(8) { grid-area: status; }
+  #ordersPanel td:nth-child(9) { grid-area: action;   justify-self: end; }
+
+  /* Thêm label nhỏ trước Ngày tạo / Miền để dễ đọc */
+  #ordersPanel td:nth-child(2)::before {
+    content: "Ngày tạo: ";
+    color: #5d7d91;
+  }
+  #ordersPanel td:nth-child(3)::before {
+    content: "Miền: ";
+    color: #5d7d91;
+  }
+
+  /* Nút action nhỏ gọn hơn trên mobile */
+  #ordersPanel .view-btn,
+  #ordersPanel .upload-btn {
+    padding: 7px 12px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  #ordersPanel .upload-btn.small {
+    padding: 7px 9px;
+  }
+
+  /* Action cell: nếu có 2 nút (Xem + thêm) thì xếp dọc cho gọn */
+  #ordersPanel td:nth-child(9) > * {
+    display: inline-flex;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   MOBILE FULL FIX — chống tràn ngang toàn bộ trang trên điện thoại
+   ════════════════════════════════════════════════════════════════════ */
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+@media (max-width: 640px) {
+
+  .main {
+    padding: 14px 14px 64px;
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .toolbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .compact-brand {
+    justify-content: flex-start;
+  }
+
+  .compact-brand h1 {
+    font-size: 19px;
+  }
+
+  .compact-brand p {
+    font-size: 13px;
+  }
+
+  .tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    overflow-x: visible;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .tab {
+    min-width: 0;
+    padding: 10px 6px;
+    font-size: 12.5px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .topbar {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .topbar h2 {
+    font-size: 16px;
+  }
+
+  .topbar p {
+    font-size: 12px;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .filters label,
+  .filters input,
+  .filters select,
+  .filters .primary-btn {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  input, select {
+    font-size: 14px;
+  }
+
+  .filters .primary-btn {
+    min-height: 46px;
+  }
+
+  .last-updated {
+    justify-self: start;
+    text-align: left;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .metric {
+    min-height: 90px;
+    padding: 14px;
+  }
+
+  .metric span {
+    font-size: 12px;
+  }
+
+  .metric strong {
+    font-size: 28px;
+    margin-top: 8px;
+  }
+
+  .region-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .region-card {
+    padding: 12px;
+  }
+
+  .overview-split,
+  .overview-split.system-only {
+    grid-template-columns: 1fr;
+  }
+
+  .system-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .system-grid div {
+    min-height: 64px;
+    padding: 10px;
+  }
+
+  .system-grid strong {
+    font-size: 18px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 10px;
+  }
+
+  .gallery-layout {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    gap: 12px;
+  }
+
+  .order-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-right: 0;
+    padding-right: 0;
+    max-height: 220px;
+    gap: 8px;
+  }
+
+  .order-item {
+    padding: 10px;
+    margin-bottom: 0;
+  }
+
+  .gallery-header {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .gallery-header h3 {
+    font-size: 15px;
+    word-break: break-word;
+  }
+
+  .image-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  #missingPanel .table-wrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+
+  #missingPanel table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+
+  #missingPanel thead {
+    display: none;
+  }
+
+  #missingPanel tbody tr {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid rgba(45, 164, 221, 0.18);
+    border-radius: 12px;
+    background: rgba(8, 25, 38, 0.82);
+    box-shadow: var(--shadow-soft);
+  }
+
+  #missingPanel td {
+    display: block;
+    border: 0;
+    padding: 0;
+    white-space: normal;
+    word-break: break-word;
+    font-size: 13px;
+  }
+
+  #missingPanel td:nth-child(1) {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f2fbff;
+  }
+
+  #missingPanel td:nth-child(2),
+  #missingPanel td:nth-child(3) {
+    color: var(--muted);
+    font-size: 12.5px;
+    display: inline-block;
+    margin-right: 10px;
+  }
+
+  #missingPanel td:nth-child(2)::before { content: "Ngày: "; }
+  #missingPanel td:nth-child(3)::before { content: "Miền: "; }
+
+  #missingPanel td:nth-child(4) {
+    font-weight: 600;
+  }
+
+  #missingPanel td:nth-child(5)::before {
+    content: "NV: ";
+    color: #5d7d91;
+  }
+
+  #missingPanel td:nth-child(6) {
+    color: var(--muted);
+    font-size: 12.5px;
+  }
+
+  #missingPanel td:nth-child(7) {
+    margin-top: 4px;
+  }
+
+  #missingPanel .upload-btn,
+  #missingPanel .view-btn {
+    padding: 8px 14px;
+    font-size: 12.5px;
+  }
+
+  .view-btn,
+  .upload-btn {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  dialog {
+    width: 94vw;
+    max-width: 94vw;
+  }
+
+  #uploadModal {
+    max-width: 94vw;
+  }
+
+  #uploadPreviewGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+
+  .app-footer {
+    padding: 24px 12px 0;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 380px) {
+  .compact-brand h1 {
+    font-size: 17px;
+  }
+
+  .tab {
+    font-size: 11.5px;
+    padding: 9px 4px;
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .image-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Tab "Hoàn thành" trên mobile — card layout giống Tất cả phiếu */
+@media (max-width: 640px) {
+  #donePanel .table-wrap {
+    border: none;
+    background: transparent;
+    overflow: visible;
+  }
+  #donePanel table {
+    min-width: 0;
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+  }
+  #donePanel thead { display: none; }
+  #donePanel tbody tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "code   action"
+      "date   date"
+      "region region"
+      "customer customer"
+      "approver approver";
+    gap: 6px 10px;
+    padding: 14px;
+    border: 1px solid rgba(45, 164, 221, 0.18);
+    border-radius: 12px;
+    background: rgba(8, 25, 38, 0.82);
+    box-shadow: var(--shadow-soft);
+  }
+  #donePanel td { display: block; border: 0; padding: 0; white-space: normal; word-break: break-word; font-size: 13px; }
+  #donePanel td:nth-child(5),
+  #donePanel td:nth-child(6) { display: none; }
+  #donePanel td:nth-child(1) { grid-area: code; font-size: 15px; font-weight: 700; }
+  #donePanel td:nth-child(2) { grid-area: date; color: var(--muted); font-size: 12.5px; }
+  #donePanel td:nth-child(3) { grid-area: region; color: var(--muted); font-size: 12.5px; }
+  #donePanel td:nth-child(4) { grid-area: customer; font-weight: 600; }
+  #donePanel td:nth-child(7) { grid-area: approver; color: var(--muted); font-size: 12px; }
+  #donePanel td:nth-child(8) { display: none; }
+  #donePanel td:nth-child(9) { grid-area: action; justify-self: end; }
+  #donePanel td:nth-child(2)::before { content: "Ngày: "; }
+  #donePanel td:nth-child(3)::before { content: "Miền: "; }
+  #donePanel td:nth-child(7)::before { content: "Duyệt bởi: "; }
+}
+
+/* Nút Đăng tải (Upload) trong bảng Tất cả phiếu */
+.upload-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 164, 221, 0.3);
+  background: linear-gradient(135deg, #2da4dd, #1a7ab0);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.upload-btn:hover { opacity: .88; transform: translateY(-1px); }
+.upload-btn.small { padding: 8px 11px; }
+
+/* Nút Đăng tải (Upload) trong bảng Tất cả phiếu */
+.upload-btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(45, 164, 221, 0.3);
+  background: linear-gradient(135deg, #2da4dd, #1a7ab0);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .15s, transform .15s;
+}
+.upload-btn:hover { opacity: .88; transform: translateY(-1px); }
+.upload-btn.small { padding: 8px 11px; }
+
+/* ════════════════════════════════════════════════════════════════════
+   FILTER PANEL — gọn lại trên mobile bằng accordion (toggle)
+   ════════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .filters label:has(#regionFilter),
+  .filters label:has(#statusFilter),
+  .filters label:has(#dateFromInput),
+  .filters label:has(#dateToInput) {
+    display: none;
+  }
+
+  .filters.expanded label:has(#regionFilter),
+  .filters.expanded label:has(#statusFilter),
+  .filters.expanded label:has(#dateFromInput),
+  .filters.expanded label:has(#dateToInput) {
+    display: grid;
+  }
+
+  .filter-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid rgba(45, 164, 221, 0.24);
+    border-radius: 10px;
+    background: rgba(8, 25, 38, 0.72);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    order: 1;
+  }
+
+  .filters label:has(#searchInput) { order: 0; }
+  .filter-toggle { order: 2; }
+  .filters label:has(#regionFilter) { order: 3; }
+  .filters label:has(#statusFilter) { order: 4; }
+  .filters label:has(#dateFromInput) { order: 5; }
+  .filters label:has(#dateToInput)   { order: 6; }
+  .filters .primary-btn { order: 7; }
+  .last-updated { order: 8; }
 }

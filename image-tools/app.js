@@ -43,10 +43,8 @@ const els = {
   galleryMeta: document.getElementById("galleryMeta"),
   imageGrid: document.getElementById("imageGrid"),
   openFolderLink: document.getElementById("openFolderLink"),
-  uploadOrderMeta: document.getElementById("uploadOrderMeta"),
-  uploadFileInput: document.getElementById("uploadFileInput"),
-  uploadBtn: document.getElementById("uploadBtn"),
-  uploadMessage: document.getElementById("uploadMessage"),
+  approveBtn: document.getElementById("approveBtn"),
+  rejectBtn: document.getElementById("rejectBtn"),
   previewDialog: document.getElementById("previewDialog"),
   previewImage: document.getElementById("previewImage"),
   closePreview: document.getElementById("closePreview")
@@ -95,23 +93,21 @@ function showError(message) {
   els.errorBox.textContent = message || "";
 }
 
-function getImageStatus(order) {
+// API mới dùng sourceSheet, cũ dùng sheet — normalize
+function getSheet(order) { return order.sourceSheet || order.sheet || ""; }
+
+function getOperationalStatus(order) {
   if (order.status === "Lỗi folder") return "Lỗi folder";
-  if (order.status === "Vượt giới hạn") return "Vượt giới hạn";
-  const limit = Number(order.imageLimit || 10);
-  const count = Number(order.imageCount || 0);
-  if (count <= 0) return "Chưa cập nhật";
-  if (count >= limit) return "Đã đủ ảnh";
-  return "Hợp lệ";
+  if (order.imageCount === 0) return "Thiếu hình";
+  if (!order.approved) return "Chờ duyệt";
+  return "Đã duyệt";
 }
 
 function matchesStatus(order) {
   if (!state.status) return true;
-  const status = getImageStatus(order);
-  if (state.status === "missing") return status === "Chưa cập nhật";
-  if (state.status === "valid") return status === "Hợp lệ";
-  if (state.status === "full") return status === "Đã đủ ảnh";
-  if (state.status === "over") return status === "Vượt giới hạn";
+  if (state.status === "missing") return order.imageCount === 0 && order.status !== "Lỗi folder";
+  if (state.status === "uploaded") return order.imageCount > 0;
+  if (state.status === "pending") return order.imageCount > 0 && !order.approved;
   if (state.status === "error") return order.status === "Lỗi folder";
   return true;
 }
@@ -124,7 +120,7 @@ function getFilteredOrders() {
   const toTime = state.dateTo ? new Date(`${state.dateTo}T23:59:59`).getTime() : null;
 
   return state.data.orders.filter(order => {
-    const matchesRegion = !state.region || order.sheet === state.region;
+    const matchesRegion = !state.region || getSheet(order) === state.region;
     const orderTime = parseOrderDate(order.date);
     const searchText = [
       order.orderCode,
@@ -162,7 +158,7 @@ function renderOverview() {
     reported: orders.filter(order => order.imageCount > 0).length,
     notReported: orders.filter(order => order.imageCount === 0 && order.status !== "Lỗi folder").length,
     missingImages: orders.filter(order => order.imageCount === 0).length,
-    pendingReview: orders.filter(order => getImageStatus(order) === "Hợp lệ").length,
+    pendingReview: orders.filter(order => order.imageCount > 0 && !order.approved).length,
     folderErrors: orders.filter(order => order.status === "Lỗi folder").length
   };
   const uploadRate = summary.total ? Math.round((summary.reported / summary.total) * 100) : 0;
@@ -179,7 +175,7 @@ function renderOverview() {
   const regions = state.data.sheetNames
     .filter(sheetName => !state.region || sheetName === state.region)
     .map(sheetName => {
-      const regionOrders = orders.filter(order => order.sheet === sheetName);
+      const regionOrders = orders.filter(order => getSheet(order) === sheetName);
       const total = regionOrders.length;
       const reported = regionOrders.filter(order => order.imageCount > 0).length;
       const missing = regionOrders.filter(order => order.imageCount === 0).length;
@@ -202,10 +198,9 @@ function renderOverview() {
 }
 
 function statusClass(status) {
-  if (status === "Chưa cập nhật") return "missing";
+  if (status === "Thiếu hình") return "missing";
   if (status === "Lỗi folder") return "error";
-  if (status === "Vượt giới hạn") return "error";
-  if (status === "Hợp lệ") return "pending";
+  if (status === "Chờ duyệt") return "pending";
   return "";
 }
 
@@ -217,19 +212,34 @@ function renderOrders() {
     return;
   }
 
-  els.ordersBody.innerHTML = orders.map(order => `
+  els.ordersBody.innerHTML = orders.map(order => {
+    const st = getOperationalStatus(order);
+    const hasFolder = Boolean(order.folderId);
+    let actionBtn = "";
+    if (!hasFolder) {
+      actionBtn = `<span style="color:#89a8ba;font-size:12px">Chưa có folder</span>`;
+    } else if (order.imageCount === 0) {
+      actionBtn = `<button class="upload-btn" data-upload="${escapeHtml(order.id)}">+ Đăng tải</button>`;
+    } else if (order.imageCount < (order.imageLimit || 10)) {
+      actionBtn = `
+        <button class="view-btn" data-view="${escapeHtml(order.id)}">Xem (${order.imageCount})</button>
+        <button class="upload-btn small" data-upload="${escapeHtml(order.id)}">＋</button>`;
+    } else {
+      actionBtn = `<button class="view-btn" data-view="${escapeHtml(order.id)}">Xem (${order.imageCount})</button>`;
+    }
+    return `
     <tr>
       <td><strong>${escapeHtml(order.orderCode)}</strong></td>
       <td>${escapeHtml(order.date)}</td>
-      <td>${escapeHtml(order.sheet)}</td>
+      <td>${escapeHtml(getSheet(order))}</td>
       <td>${escapeHtml(order.customer)}</td>
       <td>${escapeHtml(order.sales)}</td>
-      <td>${formatNumber(order.imageCount)}/${formatNumber(order.imageLimit || 10)} ảnh</td>
-      <td>${escapeHtml(order.lastImageUpdate || "")}</td>
-      <td><span class="status ${statusClass(getImageStatus(order))}">${escapeHtml(getImageStatus(order))}</span></td>
-      <td><button class="view-btn upload-action" data-view="${escapeHtml(order.id)}">+ Upload</button></td>
-    </tr>
-  `).join("");
+      <td>${escapeHtml(order.product)}</td>
+      <td>${formatNumber(order.imageCount)}</td>
+      <td><span class="status ${statusClass(st)}">${escapeHtml(st)}</span></td>
+      <td style="display:flex;gap:6px;align-items:center">${actionBtn}</td>
+    </tr>`;
+  }).join("");
 }
 
 function renderMissing() {
@@ -244,7 +254,7 @@ function renderMissing() {
     <tr>
       <td><strong>${escapeHtml(order.orderCode)}</strong></td>
       <td>${escapeHtml(order.date)}</td>
-      <td>${escapeHtml(order.sheet)}</td>
+      <td>${escapeHtml(getSheet(order))}</td>
       <td>${escapeHtml(order.customer)}</td>
       <td>${escapeHtml(order.sales)}</td>
       <td>${escapeHtml(order.note)}</td>
@@ -255,13 +265,40 @@ function renderMissing() {
 function selectOrder(orderId) {
   const order = state.data && state.data.orders.find(item => item.id === orderId);
   state.selectedOrderId = orderId;
-  if (order) state.search = order.orderCode || state.search;
-  setTab("gallery");
-  renderGallery();
+
+  if (state.activeTab === "done") {
+    renderDoneImages(order);
+    return;
+  }
+
+  if (order && order.imageCount > 0) {
+    setTab("gallery");
+    renderGallery();
+    return;
+  }
+
+  setTab("missing");
+  renderMissing();
+}
+
+function renderDoneImages(order) {
+  const grid = document.getElementById("doneImageGrid");
+  if (!grid || !order) return;
+  grid.innerHTML = order.images && order.images.length
+    ? order.images.map(image => `
+      <article class="image-card">
+        <button data-preview="${escapeHtml(image.imageUrl)}" aria-label="Xem lớn ${escapeHtml(image.name)}">
+          <img src="${escapeHtml(image.thumbnailUrl)}" alt="${escapeHtml(image.name)}" loading="lazy" />
+        </button>
+        <p>${escapeHtml(image.name)}</p>
+      </article>
+    `).join("")
+    : `<div class="empty">Không có ảnh.</div>`;
+  grid.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function renderGallery() {
-  const orders = getFilteredOrders();
+  const orders = getFilteredOrders().filter(order => order.imageCount > 0 && !order.approved);
   const selected = orders.find(order => order.id === state.selectedOrderId) || orders[0];
 
   if (selected && !state.selectedOrderId) {
@@ -272,131 +309,41 @@ function renderGallery() {
     ? orders.map(order => `
       <button class="order-item ${order.id === state.selectedOrderId ? "is-active" : ""}" data-select="${escapeHtml(order.id)}">
         <strong>${escapeHtml(order.orderCode)}</strong>
-        <span>${escapeHtml(order.customer || order.sheet)} · ${escapeHtml(getImageStatus(order))} · ${formatNumber(order.imageCount)}/${formatNumber(order.imageLimit || 10)} ảnh</span>
+        <span>${escapeHtml(order.customer || getSheet(order))} · ${escapeHtml(getOperationalStatus(order))} · ${formatNumber(order.imageCount)} ảnh</span>
       </button>
     `).join("")
-    : `<div class="empty">Không có mã phiếu phù hợp.</div>`;
+    : `<div class="empty">Chưa có đơn nào có ảnh.</div>`;
 
   if (!selected) {
     els.galleryTitle.textContent = "Chọn một đơn để xem ảnh";
     els.galleryMeta.textContent = "";
     els.imageGrid.innerHTML = "";
     els.openFolderLink.hidden = true;
-    renderUploadPanel(null);
+    els.approveBtn.hidden = true;
+    els.rejectBtn.hidden = true;
     return;
   }
 
-  els.galleryTitle.textContent = `${selected.orderCode} · ${getImageStatus(selected)}`;
-  els.galleryMeta.textContent = [selected.customer, selected.sales, selected.sheet, selected.date, selected.lastImageUpdate].filter(Boolean).join(" · ");
+  els.galleryTitle.textContent = `${selected.orderCode} · ${getOperationalStatus(selected)}`;
+  els.galleryMeta.textContent = [selected.customer, selected.sales, getSheet(selected), selected.date].filter(Boolean).join(" · ");
   els.openFolderLink.href = `https://drive.google.com/drive/folders/${encodeURIComponent(selected.folderId)}`;
   els.openFolderLink.hidden = false;
-  renderUploadPanel(selected);
 
-  els.imageGrid.innerHTML = selected.images && selected.images.length ? selected.images.map(image => `
+  const opStatus = getOperationalStatus(selected);
+  const needReview = opStatus === "Chờ duyệt";
+  els.approveBtn.hidden = !needReview;
+  els.rejectBtn.hidden = !needReview;
+  els.approveBtn.onclick = () => doReviewAction(selected, "approved");
+  els.rejectBtn.onclick = () => doReviewAction(selected, "rejected");
+
+  els.imageGrid.innerHTML = selected.images.map(image => `
     <article class="image-card">
       <button data-preview="${escapeHtml(image.imageUrl)}" aria-label="Xem lớn ${escapeHtml(image.name)}">
         <img src="${escapeHtml(image.thumbnailUrl)}" alt="${escapeHtml(image.name)}" loading="lazy" />
       </button>
       <p>${escapeHtml(image.name)}</p>
-      <small>${escapeHtml(image.updatedAt || image.createdAt || "")}</small>
     </article>
-  `).join("") : `<div class="empty">Phiếu này chưa có hình. Có thể upload trực tiếp ở khung phía trên.</div>`;
-}
-
-function renderUploadPanel(order) {
-  if (!els.uploadOrderMeta) return;
-
-  els.uploadMessage.textContent = "";
-  els.uploadMessage.className = "upload-message";
-
-  if (!order) {
-    els.uploadOrderMeta.textContent = "Chọn một mã phiếu bên trái hoặc bấm “+ Upload” ở bảng danh sách.";
-    els.uploadFileInput.disabled = true;
-    els.uploadBtn.disabled = true;
-    return;
-  }
-
-  const limit = Number(order.imageLimit || 10);
-  const count = Number(order.imageCount || 0);
-  const remaining = Math.max(limit - count, 0);
-  els.uploadOrderMeta.textContent = `${order.orderCode} · ${order.customer || "Không có tên khách hàng"} · ${count}/${limit} ảnh · còn ${remaining} ảnh. Bấm “+ Chọn hình” để thêm ảnh.`;
-  els.uploadFileInput.disabled = remaining <= 0 || !order.folderId;
-  els.uploadBtn.disabled = remaining <= 0 || !order.folderId || !els.uploadFileInput.files.length;
-
-  if (!order.folderId) {
-    els.uploadMessage.textContent = "Phiếu này chưa có link thư mục Drive.";
-    els.uploadMessage.classList.add("is-error");
-    return;
-  }
-
-  if (remaining <= 0) {
-    els.uploadMessage.textContent = "Phiếu đã đạt giới hạn tối đa 10 hình ảnh.";
-    els.uploadMessage.classList.add("is-error");
-  }
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || "").split(",")[1] || "");
-    reader.onerror = () => reject(reader.error || new Error("Không đọc được file ảnh."));
-    reader.readAsDataURL(file);
-  });
-}
-
-async function uploadSelectedImages() {
-  const order = state.data && state.data.orders.find(item => item.id === state.selectedOrderId);
-  const files = [...(els.uploadFileInput.files || [])];
-  if (!order || !files.length) return;
-
-  const limit = Number(order.imageLimit || 10);
-  const remaining = Math.max(limit - Number(order.imageCount || 0), 0);
-  if (files.length > remaining) {
-    els.uploadMessage.textContent = "Phiếu đã đạt giới hạn tối đa 10 hình ảnh.";
-    els.uploadMessage.className = "upload-message is-error";
-    return;
-  }
-
-  els.uploadBtn.disabled = true;
-  els.uploadBtn.textContent = "Đang upload...";
-  els.uploadMessage.textContent = "";
-  els.uploadMessage.className = "upload-message";
-
-  try {
-    const payloadFiles = await Promise.all(files.map(async file => ({
-      name: file.name,
-      type: file.type || "image/jpeg",
-      data: await fileToBase64(file)
-    })));
-
-    const response = await fetch("/api/upload", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderCode: order.orderCode,
-        folderId: order.folderId,
-        sourceSheet: order.sourceSheet || order.sheet,
-        rowNumber: order.rowNumber,
-        files: payloadFiles
-      })
-    });
-    const result = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(result.error || "Upload không thành công.");
-
-    els.uploadFileInput.value = "";
-    els.uploadMessage.textContent = `Đã upload ${formatNumber(result.uploaded || files.length)} ảnh.`;
-    els.uploadMessage.className = "upload-message is-success";
-    await loadData();
-    const refreshed = state.data.orders.find(item => item.orderCode === order.orderCode && item.folderId === order.folderId);
-    if (refreshed) state.selectedOrderId = refreshed.id;
-    renderGallery();
-  } catch (err) {
-    els.uploadMessage.textContent = err.message;
-    els.uploadMessage.className = "upload-message is-error";
-  } finally {
-    els.uploadBtn.textContent = "Upload hình";
-    renderUploadPanel(state.data && state.data.orders.find(item => item.id === state.selectedOrderId));
-  }
+  `).join("");
 }
 
 function renderRegionOptions() {
@@ -445,7 +392,15 @@ async function loadData() {
       throw new Error(data.error || "Không tải được dữ liệu.");
     }
 
+    // approved đã được map đúng từ dashboard.js (cột MKT check)
+    // approvedBy/approvedAt cần extract từ field riêng nếu có
+    if (data && data.orders) {
+      data.orders.forEach(o => {
+        if (o.approved === undefined) o.approved = false;
+      });
+    }
     state.data = data;
+    console.log("approved sample:", data.orders && data.orders.slice(0,3).map(o => ({id:o.id, approved:o.approved, sysNote:o.sysNote})));
     els.lastUpdated.textContent = `Cập nhật: ${formatVietnamDateTime(data.generatedAt)}`;
     render();
   } catch (err) {
@@ -492,36 +447,21 @@ els.dateToInput.addEventListener("change", event => {
 
 els.refreshBtn.addEventListener("click", loadData);
 
-els.uploadFileInput.addEventListener("change", () => {
-  const order = state.data && state.data.orders.find(item => item.id === state.selectedOrderId);
-  if (!order) {
-    renderUploadPanel(null);
-    return;
-  }
-
-  const limit = Number(order.imageLimit || 10);
-  const remaining = Math.max(limit - Number(order.imageCount || 0), 0);
-  const fileCount = els.uploadFileInput.files ? els.uploadFileInput.files.length : 0;
-
-  renderUploadPanel(order);
-  if (fileCount > remaining) {
-    els.uploadMessage.textContent = "Phiếu đã đạt giới hạn tối đa 10 hình ảnh.";
-    els.uploadMessage.className = "upload-message is-error";
-    els.uploadBtn.disabled = true;
-  } else if (fileCount > 0) {
-    els.uploadMessage.textContent = `Đã chọn ${formatNumber(fileCount)} ảnh. Bấm “Upload hình” để lưu lên Drive.`;
-    els.uploadMessage.className = "upload-message is-success";
-  }
-});
-
-els.uploadBtn.addEventListener("click", uploadSelectedImages);
-
 document.addEventListener("click", event => {
   const viewButton = event.target.closest("[data-view]");
   const selectButton = event.target.closest("[data-select]");
   const previewButton = event.target.closest("[data-preview]");
 
-  if (viewButton) selectOrder(viewButton.dataset.view);
+  if (viewButton) {
+    const orderId = viewButton.dataset.view;
+    if (state.activeTab === "gallery") {
+      selectOrder(orderId);
+    } else {
+      // Hiện hình inline ở tab hiện tại (Hoàn thành)
+      const order = state.data && state.data.orders.find(o => o.id === orderId);
+      if (order) selectOrder(orderId, true);
+    }
+  }
   if (selectButton) {
     state.selectedOrderId = selectButton.dataset.select;
     renderGallery();
@@ -539,3 +479,245 @@ els.closePreview.addEventListener("click", () => {
 
 loadData();
 setInterval(loadData, 10 * 60 * 1000);
+
+/* ─── REVIEW (Duyệt / Từ chối) ─── */
+
+async function doReviewAction(order, action) {
+  const savedPhone = localStorage.getItem("mkt_reviewer_phone") || "";
+  const phone = prompt("Nhập số điện thoại của bạn (nhân viên Marketing) để xác nhận:", savedPhone);
+  if (phone) localStorage.setItem("mkt_reviewer_phone", phone.trim());
+  if (!phone) return;
+
+  let note = "";
+  if (action === "rejected") {
+    note = prompt("Lý do từ chối (không bắt buộc):") || "";
+  }
+
+  const btn = action === "approved" ? els.approveBtn : els.rejectBtn;
+  const otherBtn = action === "approved" ? els.rejectBtn : els.approveBtn;
+  const originalText = btn.textContent;
+  btn.disabled = true;
+  otherBtn.disabled = true;
+  btn.textContent = "Đang xử lý...";
+
+  try {
+    const resp = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "review",
+        orderCode: order.orderCode,
+        reviewAction: action,
+        reviewNote: note,
+        reviewerPhone: phone
+      })
+    });
+    const result = await resp.json();
+    if (result.error) { alert("Lỗi: " + result.error); return; }
+
+    alert(`✓ Phiếu ${result.orderCode} đã ${result.status}${result.reviewer ? " bởi " + result.reviewer : ""}`);
+
+    const idx = state.data.orders.findIndex(o => o.id === order.id);
+    if (idx >= 0) {
+      state.data.orders[idx].status = result.status;
+      state.data.orders[idx].approved = action === "approved";
+      state.data.orders[idx].approvedBy = result.reviewer || "";
+      state.data.orders[idx].approvedAt = result.updatedAt || "";
+    }
+    render();
+  } catch (e) {
+    alert("Thao tác thất bại: " + e.message);
+  } finally {
+    btn.disabled = false;
+    otherBtn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+/* ─── UPLOAD MODAL ─── */
+let uploadOrder = null;
+let uploadFiles = [];
+
+function openUploadModal(orderId) {
+  uploadOrder = state.data && state.data.orders.find(o => o.id === orderId);
+  if (!uploadOrder) return;
+  uploadFiles = [];
+
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing;
+
+  document.getElementById("uploadModalTitle").textContent = `Upload ảnh — ${uploadOrder.orderCode}`;
+  document.getElementById("uploadModalMeta").textContent =
+    `${uploadOrder.customer} · ${getSheet(uploadOrder)} · ${existing}/${limit} ảnh`;
+  document.getElementById("uploadPreviewGrid").innerHTML = "";
+  document.getElementById("uploadSuccessBox").hidden = true;
+  document.getElementById("uploadSubmitBtn").hidden = true;
+  document.getElementById("uploadWarn").hidden = true;
+
+  const dz = document.getElementById("uploadDropzone");
+  if (remaining <= 0) {
+    dz.innerHTML = `<p style="color:#f59e0b">Phiếu đã đủ ${limit} ảnh, không thể upload thêm.</p>`;
+    dz.onclick = null;
+  } else {
+    dz.innerHTML = `
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <p>Kéo thả ảnh vào đây hoặc <strong>bấm để chọn</strong></p>
+      <small>Còn có thể thêm ${remaining} ảnh</small>
+      <input type="file" id="uploadFileInput" accept="image/*" multiple style="display:none">
+    `;
+    dz.onclick = () => document.getElementById("uploadFileInput").click();
+    dz.ondragover = e => { e.preventDefault(); dz.classList.add("dz-over"); };
+    dz.ondragleave = () => dz.classList.remove("dz-over");
+    dz.ondrop = e => { e.preventDefault(); dz.classList.remove("dz-over"); handleUploadFiles(e.dataTransfer.files); };
+    setTimeout(() => {
+      const fi = document.getElementById("uploadFileInput");
+      if (fi) fi.onchange = e => handleUploadFiles(e.target.files);
+    }, 50);
+  }
+
+  document.getElementById("uploadModal").showModal();
+}
+
+function handleUploadFiles(fileList) {
+  if (!uploadOrder) return;
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing - uploadFiles.length;
+  if (remaining <= 0) return;
+
+  const toAdd = Array.from(fileList).slice(0, remaining);
+  Promise.all(toAdd.map(f => new Promise(res => {
+    const r = new FileReader();
+    r.onload = () => res({ file: f, dataUrl: r.result });
+    r.readAsDataURL(f);
+  }))).then(results => {
+    uploadFiles = uploadFiles.concat(results);
+    renderUploadPreviews();
+  });
+}
+
+function renderUploadPreviews() {
+  const grid = document.getElementById("uploadPreviewGrid");
+  grid.innerHTML = uploadFiles.map((f, i) => `
+    <div class="up-prev-item">
+      <img src="${f.dataUrl}" alt="">
+      <button class="up-prev-remove" data-ri="${i}" title="Xoá">×</button>
+    </div>
+  `).join("");
+  document.getElementById("uploadSubmitBtn").hidden = uploadFiles.length === 0;
+  const limit = uploadOrder.imageLimit || 10;
+  const existing = uploadOrder.imageCount || 0;
+  const remaining = limit - existing;
+  const warn = document.getElementById("uploadWarn");
+  warn.hidden = uploadFiles.length < remaining;
+  warn.textContent = `Còn có thể thêm tối đa ${remaining} ảnh.`;
+}
+
+async function doUploadSubmit() {
+  if (!uploadFiles.length || !uploadOrder) return;
+  const btn = document.getElementById("uploadSubmitBtn");
+  btn.disabled = true; btn.textContent = "Đang upload…";
+  try {
+    const files = uploadFiles.map(f => {
+      const comma = f.dataUrl.indexOf(",");
+      return { name: f.file.name, type: f.file.type, data: f.dataUrl.slice(comma + 1) };
+    });
+    const resp = await fetch("/api/upload", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderCode: uploadOrder.orderCode,
+        folderId: uploadOrder.folderId,
+        sourceSheet: getSheet(uploadOrder),
+        customer: uploadOrder.customer, 
+	rowNumber: uploadOrder.rowNumber,
+        files
+      })
+    });
+    const result = await resp.json();
+    if (result.error) { alert("Lỗi: " + result.error); return; }
+
+    // cập nhật local state
+    const idx = state.data.orders.findIndex(o => o.id === uploadOrder.id);
+    if (idx >= 0) {
+      state.data.orders[idx].imageCount = result.imageCount;
+      state.data.orders[idx].status = result.status;
+      if (result.files) state.data.orders[idx].images = (state.data.orders[idx].images || []).concat(result.files);
+    }
+
+    const box = document.getElementById("uploadSuccessBox");
+    box.textContent = `✓ Đã upload ${result.uploaded} ảnh — Tổng ${result.imageCount}/${uploadOrder.imageLimit || 10} — ${result.status}`;
+    box.hidden = false;
+    uploadFiles = [];
+    document.getElementById("uploadPreviewGrid").innerHTML = "";
+    document.getElementById("uploadSubmitBtn").hidden = true;
+    render();
+  } catch(e) { alert("Upload thất bại: " + e.message); }
+  finally { btn.disabled = false; btn.textContent = "Upload ảnh"; }
+}
+
+document.addEventListener("click", e => {
+  const ri = e.target.dataset.ri;
+  if (ri !== undefined && e.target.classList.contains("up-prev-remove")) {
+    uploadFiles.splice(Number(ri), 1);
+    renderUploadPreviews();
+  }
+});
+
+
+
+// ════════════════════════════════════════════════════════════════════
+// PATCH: Tab "Hoàn thành" — các phiếu đã được MKT duyệt (approved=true)
+// ════════════════════════════════════════════════════════════════════
+tabTitles.done = ["Hoàn thành", "Các phiếu đã được MKT xác nhận duyệt"];
+
+els.panels.done = document.getElementById("donePanel");
+els.doneBody = document.getElementById("doneBody");
+
+function renderDone() {
+  const done = getFilteredOrders().filter(o => o.approved);
+
+  if (!done.length) {
+    els.doneBody.innerHTML = `<tr><td colspan="9"><div class="empty">Chưa có phiếu nào được duyệt.</div></td></tr>`;
+    return;
+  }
+
+  els.doneBody.innerHTML = done.map(o => `
+    <tr>
+      <td><strong>${escapeHtml(o.orderCode)}</strong></td>
+      <td>${escapeHtml(o.date)}</td>
+      <td>${escapeHtml(getSheet(o))}</td>
+      <td>${escapeHtml(o.customer)}</td>
+      <td>${escapeHtml(o.sales)}</td>
+      <td>${formatNumber(o.imageCount)}</td>
+      <td>${escapeHtml(o.approvedBy || "")}</td>
+      <td>${escapeHtml(o.approvedAt || "")}</td>
+      <td><button class="view-btn" data-view="${escapeHtml(o.id)}">Xem (${o.imageCount})</button></td>
+    </tr>
+  `).join("");
+}
+
+const _origRender = render;
+render = function() {
+  _origRender();
+  renderDone();
+};
+
+if (state.data) renderDone();
+
+// Toggle filter mở rộng trên mobile
+const filterToggleBtn = document.getElementById("filterToggle");
+if (filterToggleBtn) {
+  filterToggleBtn.addEventListener("click", () => {
+    const filters = document.querySelector(".filters");
+    const expanded = filters.classList.toggle("expanded");
+    filterToggleBtn.textContent = expanded ? "▴ Ẩn bộ lọc" : "▾ Bộ lọc khác";
+  });
+}
+
+// Click handler cho nút upload (+ Đăng tải)
+document.addEventListener("click", e => {
+  const uploadBtn = e.target.closest("[data-upload]");
+  if (uploadBtn) openUploadModal(uploadBtn.dataset.upload);
+});
