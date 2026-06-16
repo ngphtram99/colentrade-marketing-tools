@@ -1843,7 +1843,7 @@ html, body {
     display: grid;
   }
 
-  .filter-toggle { display:none;
+  .filter-toggle { display:none !important;
     align-items: center;
     justify-content: center;
     gap: 6px;
@@ -1860,7 +1860,7 @@ html, body {
   }
 
   .filters label:has(#searchInput) { order: 0; }
-  .filter-toggle { order: 2; display:block; }
+  .filter-toggle { order: 2; display:flex !important; }
   .filters label:has(#regionFilter) { order: 3; }
   .filters label:has(#statusFilter) { order: 4; }
   .filters label:has(#dateFromInput) { order: 5; }
