@@ -671,8 +671,7 @@ function buildDsmRow(source) {
   const phatSinh = toNumber(source.phatSinh || source.dinh);
   const tong = toNumber(source.tong || (tonDau + phatSinh));
   const xuat = toNumber(source.xuat);
-  const tonCuoiRaw = toNumber(source.tonCuoi);
-  const tonCuoi = tonCuoiRaw > 0 ? tonCuoiRaw : Math.max(tong - xuat, 0);
+  const tonCuoi = Math.max(tong - xuat, 0);
   const vuot = Math.max(xuat - tong, 0);
   const tt = vuot > 0 ? 'Vượt định mức' : 'Chưa vượt';
   const history = Array.isArray(source.history) ? source.history.map(item => ({
