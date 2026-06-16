@@ -91,11 +91,23 @@ body{font-family:Inter,system-ui,sans-serif;color:var(--text);background:var(--b
 
 <script>
 const frame = document.getElementById('tool-frame');
+
+// Khôi phục tab đang active từ sessionStorage
+const savedSrc = sessionStorage.getItem('activeTool');
+if (savedSrc) {
+  document.querySelectorAll('.nav').forEach(btn => {
+    const isActive = btn.dataset.src === savedSrc;
+    btn.classList.toggle('active', isActive);
+    if (isActive) frame.src = savedSrc;
+  });
+}
+
 document.querySelectorAll('.nav').forEach(button => {
   button.addEventListener('click', () => {
     document.querySelectorAll('.nav').forEach(item => item.classList.remove('active'));
     button.classList.add('active');
     frame.src = button.dataset.src;
+    sessionStorage.setItem('activeTool', button.dataset.src);
   });
 });
 </script>
