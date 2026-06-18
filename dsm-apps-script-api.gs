@@ -273,6 +273,7 @@ function authorizeDsmUser_(ss, phone) {
   const regionCol = findMappedColumn_(headerMap, ["KHU VUC", "MIEN/KHU VUC", "MIEN", "REGION"]);
   const roleCol = findMappedColumn_(headerMap, ["VAI TRO", "ROLE"]);
   const statusCol = findMappedColumn_(headerMap, ["TRANG THAI", "STATUS"]);
+  const codeCol = findMappedColumn_(headerMap, ["CODE", "MA", "MA TRUY CAP"]);
 
   // Fallbacks for compact staff sheets if headers are edited later.
   if (phoneCol < 0) phoneCol = findLikelyPhoneColumn_(rows, headerRowIndex + 1);
@@ -310,7 +311,8 @@ function authorizeDsmUser_(ss, phone) {
         title: titleCol >= 0 ? row[titleCol] : "",
         region: regionCol >= 0 ? row[regionCol] : "",
         role: roleCol >= 0 ? row[roleCol] : "User",
-        status: statusCol >= 0 ? row[statusCol] : "Active"
+        status: statusCol >= 0 ? row[statusCol] : "Active",
+      code: codeCol >= 0 ? String(row[codeCol] || "").trim() : ""
       }
     };
   }
